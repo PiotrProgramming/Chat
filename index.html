@@ -45,6 +45,21 @@
             color: #6b7280 !important; /* Gray 500 */
             opacity: 1;
         }
+        .message-status {
+            font-size: 0.65rem;
+            margin-top: 2px;
+            text-align: right;
+            color: #6b7280;
+        }
+        .typing-indicator {
+            display: none;
+            padding: 12px;
+            background-color: #f3f4f6;
+            border-radius: 12px;
+            margin: 8px 0;
+            width: fit-content;
+            max-width: 70%;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -183,6 +198,8 @@
         let contacts = [];
         let conversations = {};
         let currentContact = null;
+        let typingTimeout = null;
+        let isTyping = false;
 
         // Initialize conversations from localStorage
         function loadConversations() {
@@ -273,6 +290,17 @@
             const messagesContainer = document.getElementById('messages');
             messagesContainer.innerHTML = '';
             
+            // Add typing indicator
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.id = 'typing-indicator';
+            typingIndicator.innerHTML = `
+                <span class="dot">•</span>
+                <span class="dot">•</span>
+                <span class="dot">•</span>
+            `;
+            messagesContainer.appendChild(typingIndicator);
+            
             if (conversations[contactLogin] && conversations[contactLogin].length > 0) {
                 const messagesFragment = document.createDocumentFragment();
                 
@@ -280,10 +308,20 @@
                     const messageElement = document.createElement('div');
                     messageElement.className = `mb-4 ${message.sender === contactLogin ? 'text-left' : 'text-right'}`;
                     
+                    // Determine message status
+                    let statusText = '';
+                    if (message.sender === currentUser) {
+                        if (message.delivered) statusText = 'Delivered';
+                        else statusText = 'Sending...';
+                    }
+                    
                     messageElement.innerHTML = `
                         <div class="inline-block max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.sender === contactLogin ? 'bg-white text-gray-800' : 'bg-blue-600 text-white'} shadow">
                             <p class="text-sm">${message.text}</p>
-                            <p class="text-xs opacity-75 mt-1">${formatDate(message.timestamp)}</p>
+                            <p class="text-xs opacity-75 mt-1 flex justify-between">
+                                <span>${formatDate(message.timestamp)}</span>
+                                ${message.sender === currentUser ? `<span class="message-status">${statusText}</span>` : ''}
+                            </p>
                         </div>
                     `;
                     
@@ -307,6 +345,48 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
+        // Simulate contact response
+        function simulateContactResponse() {
+            if (!currentContact) return;
+            
+            // Hide typing indicator
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.style.display = 'none';
+            }
+            
+            // Simulate response after delay
+            setTimeout(() => {
+                const responses = [
+                    "Thanks for your message!",
+                    "I'll get back to you shortly.",
+                    "That's a great point, let me think about it.",
+                    "I understand your concern and will address it.",
+                    "Could you please provide more details?",
+                    "I appreciate your patience.",
+                    "Let me check on that for you."
+                ];
+                
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                const responseMessage = {
+                    id: Date.now(),
+                    text: randomResponse,
+                    sender: currentContact,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Add to conversations
+                conversations[currentContact].push(responseMessage);
+                
+                // Save to localStorage
+                saveConversations();
+                
+                // Reload messages
+                loadMessages(currentContact);
+            }, 1500);
+        }
+
         // Send a message
         function sendMessage() {
             const messageInput = document.getElementById('message');
@@ -317,7 +397,8 @@
                     id: Date.now(),
                     text: messageText,
                     sender: currentUser,
-                    timestamp: new Date().toISOString()
+                    timestamp: new Date().toISOString(),
+                    delivered: true
                 };
                 
                 // Add to conversations
@@ -332,6 +413,15 @@
                 // Clear input
                 messageInput.value = '';
                 messageInput.style.height = 'auto';
+                
+                // Show typing indicator
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.style.display = 'block';
+                }
+                
+                // Simulate contact response
+                simulateContactResponse();
                 
                 // Reload messages
                 loadMessages(currentContact);
@@ -361,6 +451,22 @@
             document.getElementById('message').addEventListener('input', (e) => {
                 e.target.style.height = 'auto';
                 e.target.style.height = (e.target.scrollHeight) + 'px';
+                
+                // Show typing indicator to simulate typing
+                if (!isTyping) {
+                    isTyping = true;
+                    const typingIndicator = document.getElementById('typing-indicator');
+                    if (typingIndicator && currentContact) {
+                        typingIndicator.style.display = 'block';
+                        
+                        // Send "is typing" signal (simulated)
+                        if (typingTimeout) clearTimeout(typingTimeout);
+                        typingTimeout = setTimeout(() => {
+                            isTyping = false;
+                            typingIndicator.style.display = 'none';
+                        }, 3000);
+                    }
+                }
             });
             
             // Search functionality
@@ -447,7 +553,8 @@
             // Create a fallback users array in case users.json isn't available
             const fallbackUsers = [
                 { login: "admin", password: "password123" },
-                { login: "user", password: "demo" }
+                { login: "client1", password: "securepass1" },
+                { login: "client2", password: "securepass2" }
             ];
             
             // Try to fetch users.json
@@ -542,7 +649,8 @@
                         // Use fallback users if we can't load users.json
                         const fallbackUsers = [
                             { login: "admin", password: "password123" },
-                            { login: "user", password: "demo" }
+                            { login: "client1", password: "securepass1" },
+                            { login: "client2", password: "securepass2" }
                         ];
                         allUsers = fallbackUsers;
                         contacts = fallbackUsers.filter(u => u.login !== currentUser);
@@ -574,13 +682,18 @@ users.json template (create this file in the same folder as index.html):
   }
 ]
 
-IMPORTANT: This is for local development only. For production, you would need a server-side authentication system.
-Never store passwords in plain text in a real application - this is just for demonstration purposes.
-In a real implementation, passwords should be hashed and verified on the server.
+IMPORTANT: This is a client-side only application running on GitHub Pages.
 
-Troubleshooting:
-1. Make sure users.json is in the same folder as index.html
-2. Check that users.json has valid JSON format (use a JSON validator)
-3. Ensure there are no extra spaces in the username/password fields
-4. If using GitHub Pages, make sure the file is committed to your repository
+Note on message delivery:
+- This is a demonstration application with simulated message delivery
+- In a real application, you would need a backend server to handle message delivery between users
+- For this demo, when you send a message, the system simulates a response from the contact
+- Messages are stored only in your browser's localStorage (they're not actually sent to other users)
+
+To make this a real multi-user chat application, you would need:
+1. A backend server to store and route messages
+2. A database to persist conversations
+3. Real-time communication (WebSockets, Firebase, etc.)
+
+This implementation is designed for demonstration purposes only to show the UI/UX of a chat application.
 -->
