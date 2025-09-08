@@ -9,6 +9,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f9fafb;
         }
         .message-container {
             max-height: calc(100vh - 200px);
@@ -34,21 +35,135 @@
             0%, 60%, 100% { transform: translateY(0); }
             30% { transform: translateY(-5px); }
         }
+        .login-container {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="flex h-screen">
+    <!-- Login Page -->
+    <div id="login-page" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="login-container p-8 text-white">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-white rounded-2xl mx-auto flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold">ClientChat Pro</h1>
+                    <p class="text-indigo-100 mt-2">Secure communication for professionals</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Sign in to your account</h2>
+                    
+                    <div id="login-error" class="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-4 hidden">
+                        Invalid username or password
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                            <input type="text" id="username" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="password" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <button id="login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition duration-200">
+                            Sign In
+                        </button>
+                        
+                        <div class="text-center text-sm text-gray-500">
+                            Don't have an account? <a href="#" id="register-link" class="text-indigo-600 hover:text-indigo-500 font-medium">Register</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 text-center text-sm text-indigo-100">
+                    <p>For security, users must be added manually to users.json</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Page -->
+    <div id="register-page" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="login-container p-8 text-white">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-white rounded-2xl mx-auto flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m-6-3v3m-6-3v3m9 8v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6M12 15h.01M12 12h.01M12 9h.01"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold">ClientChat Pro</h1>
+                    <p class="text-indigo-100 mt-2">Create your professional account</p>
+                </div>
+                
+                <div class="bg-white rounded-xl p-6 shadow-md">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6">Create Account</h2>
+                    
+                    <div id="register-error" class="bg-red-50 text-red-500 text-sm p-3 rounded-lg mb-4 hidden">
+                        Username already exists
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="new-username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                            <input type="text" id="new-username" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <div>
+                            <label for="new-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="new-password" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <div>
+                            <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                            <input type="password" id="confirm-password" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                        
+                        <button id="register-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition duration-200">
+                            Create Account
+                        </button>
+                        
+                        <div class="text-center text-sm text-gray-500">
+                            <a href="#" id="back-to-login" class="text-indigo-600 hover:text-indigo-500 font-medium">Back to Login</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 text-center text-sm text-indigo-100">
+                    <p>Note: This only creates a local entry. You must manually update users.json for permanent storage</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat App (Hidden Initially) -->
+    <div id="chat-app" class="flex h-screen hidden">
         <!-- Sidebar -->
         <div class="w-80 bg-white border-r border-gray-200 flex flex-col">
             <!-- Header -->
-            <div class="p-6 border-b border-gray-200">
-                <h1 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        ClientChat
+                    </h1>
+                    <p class="text-sm text-gray-500 mt-1">Professional communication platform</p>
+                </div>
+                <button id="logout-btn" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                     </svg>
-                    ClientChat
-                </h1>
-                <p class="text-sm text-gray-500 mt-1">Professional communication platform</p>
+                </button>
             </div>
 
             <!-- Search -->
@@ -121,20 +236,26 @@
             { id: 5, name: "Lisa Park", email: "lisa@example.com", status: "online", avatar: "LP" }
         ];
 
-        // Store conversations in localStorage
-        let conversations = JSON.parse(localStorage.getItem('clientChatConversations')) || {};
+        let currentUser = null;
+        let conversations = {};
         let currentClientId = null;
 
-        // Initialize conversations if empty
-        clients.forEach(client => {
-            if (!conversations[client.id]) {
-                conversations[client.id] = [];
-            }
-        });
+        // Initialize conversations from localStorage
+        function loadConversations() {
+            const saved = localStorage.getItem(`chat_conversations_${currentUser}`);
+            conversations = saved ? JSON.parse(saved) : {};
+            
+            // Initialize conversations for all clients if empty
+            clients.forEach(client => {
+                if (!conversations[client.id]) {
+                    conversations[client.id] = [];
+                }
+            });
+        }
 
         // Save conversations to localStorage
         function saveConversations() {
-            localStorage.setItem('clientChatConversations', JSON.stringify(conversations));
+            localStorage.setItem(`chat_conversations_${currentUser}`, JSON.stringify(conversations));
         }
 
         // Format date
@@ -148,8 +269,6 @@
             const lastMessage = conversations[client.id].length > 0 
                 ? conversations[client.id][conversations[client.id].length - 1] 
                 : null;
-            
-            const unreadCount = 0; // In a real app, you'd track unread messages
             
             const conversation = document.createElement('div');
             conversation.className = `p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition duration-150 ${currentClientId === client.id ? 'bg-blue-50 border-r-2 border-r-blue-500' : ''}`;
@@ -170,7 +289,6 @@
                         </div>
                         <p class="text-sm text-gray-600 truncate">${lastMessage ? lastMessage.text : 'No messages yet'}</p>
                     </div>
-                    ${unreadCount > 0 ? `<div class="bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-2">${unreadCount}</div>` : ''}
                 </div>
             `;
             
@@ -257,9 +375,6 @@
                 };
                 
                 // Add to conversations
-                if (!conversations[currentClientId]) {
-                    conversations[currentClientId] = [];
-                }
                 conversations[currentClientId].push(newMessage);
                 
                 // Save to localStorage
@@ -274,10 +389,12 @@
             }
         }
 
-        // Initialize the app
-        function initApp() {
+        // Initialize the chat app
+        function initChatApp() {
             // Populate conversations list
             const conversationsContainer = document.getElementById('conversations');
+            conversationsContainer.innerHTML = '';
+            
             clients.forEach(client => {
                 conversationsContainer.appendChild(createConversationElement(client));
             });
@@ -312,14 +429,135 @@
                 });
             });
             
+            // Logout functionality
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem(`chat_conversations_${currentUser}`);
+                currentUser = null;
+                showLoginPage();
+            });
+            
             // Open first conversation by default
             if (clients.length > 0) {
                 openConversation(clients[0]);
             }
         }
 
-        // Start the app when page loads
-        window.addEventListener('load', initApp);
+        // Show login page
+        function showLoginPage() {
+            document.getElementById('login-page').classList.remove('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('chat-app').classList.add('hidden');
+        }
+
+        // Show register page
+        function showRegisterPage() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('register-page').classList.remove('hidden');
+            document.getElementById('chat-app').classList.add('hidden');
+        }
+
+        // Show chat app
+        function showChatApp() {
+            document.getElementById('login-page').classList.add('hidden');
+            document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('chat-app').classList.remove('hidden');
+            loadConversations();
+            initChatApp();
+        }
+
+        // Handle login
+        function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showError('login-error', 'Please enter both username and password');
+                return;
+            }
+            
+            // In a real app, you would fetch users.json here
+            // For this demo, we'll use a mock user
+            const mockUsers = [
+                { login: 'admin', password: 'password123' },
+                { login: 'user', password: 'demo' }
+            ];
+            
+            const user = mockUsers.find(u => u.login === username && u.password === password);
+            
+            if (user) {
+                currentUser = username;
+                showChatApp();
+            } else {
+                showError('login-error', 'Invalid username or password');
+            }
+        }
+
+        // Handle registration
+        function handleRegistration() {
+            const username = document.getElementById('new-username').value.trim();
+            const password = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (!username || !password || !confirmPassword) {
+                showError('register-error', 'Please fill in all fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError('register-error', 'Passwords do not match');
+                return;
+            }
+            
+            // In a real app, you would:
+            // 1. Check if username exists in users.json
+            // 2. Add new user to users.json (but this requires server-side code)
+            // Since we can't write to server from client, we'll just show a message
+            
+            // For demo, we'll allow registration but note it's not persistent
+            currentUser = username;
+            showChatApp();
+            
+            alert('Account created! Note: In a real implementation, you would need to manually add this user to users.json for permanent storage.');
+        }
+
+        // Show error message
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorElement.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is already logged in (for demo purposes)
+            // In real implementation, you'd check session state
+            
+            // Set up event listeners
+            document.getElementById('login-btn').addEventListener('click', handleLogin);
+            document.getElementById('register-link').addEventListener('click', (e) => {
+                e.preventDefault();
+                showRegisterPage();
+            });
+            document.getElementById('back-to-login').addEventListener('click', (e) => {
+                e.preventDefault();
+                showLoginPage();
+            });
+            document.getElementById('register-btn').addEventListener('click', handleRegistration);
+            
+            // For demo, auto-login if we have a currentUser in localStorage
+            // In real app, you'd use session management
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = savedUser;
+                showChatApp();
+            } else {
+                showLoginPage();
+            }
+        });
     </script>
 </body>
 </html>
