@@ -79,6 +79,14 @@
             border-radius: 50%;
             margin-right: 4px;
         }
+        .handle-tag {
+            background-color: #e0e7ff;
+            color: #4338ca;
+            padding: 2px 6px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -162,6 +170,15 @@
                         </div>
                         
                         <div class="relative">
+                            <label for="register-handle" class="block text-sm font-medium text-gray-700 mb-1">Handle</label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">@</span>
+                                <input type="text" id="register-handle" class="w-full pl-8 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900" placeholder="yourhandle">
+                            </div>
+                            <div id="handle-error" class="error-message">Handle must be 3-15 characters, letters and numbers only</div>
+                        </div>
+                        
+                        <div class="relative">
                             <label for="register-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                             <input type="password" id="register-password" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-900" placeholder="Create a password">
                             <div id="register-password-error" class="error-message">Password must be at least 6 characters</div>
@@ -190,6 +207,39 @@
         </div>
     </div>
 
+    <!-- Add Contact Page -->
+    <div id="add-contact-page" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800">Add Contact</h2>
+                <p class="text-gray-500 mt-1">Find users by their handle</p>
+            </div>
+            
+            <div class="p-6">
+                <div class="relative mb-6">
+                    <input type="text" id="search-handle" placeholder="Search by handle..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                
+                <div id="search-results" class="space-y-3">
+                    <!-- Search results will appear here -->
+                    <div class="text-center text-gray-500 py-4">
+                        Enter a handle to search for users
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-200">
+                <button id="close-add-contact" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 rounded-lg transition duration-200">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Chat App (Hidden Initially) -->
     <div id="chat-app" class="flex h-screen hidden">
         <!-- Sidebar -->
@@ -205,11 +255,18 @@
                     </h1>
                     <p class="text-sm text-gray-500 mt-1">Real-time communication platform</p>
                 </div>
-                <button id="logout-btn" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                    </svg>
-                </button>
+                <div class="flex space-x-2">
+                    <button id="add-contact-btn" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                    </button>
+                    <button id="logout-btn" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Search -->
@@ -240,6 +297,7 @@
                     <div class="ml-3">
                         <h2 id="contact-name" class="font-semibold text-gray-800">Contact Name</h2>
                         <p id="contact-status" class="text-sm"><span class="online-dot"></span>Online</p>
+                        <p id="contact-handle" class="handle-tag mt-1">@handle</p>
                     </div>
                 </div>
             </div>
@@ -297,6 +355,7 @@
         let onlineStatusRef = null;
         let isOnline = false;
         let messageListeners = [];
+        let handleToUidMap = {};
 
         // Initialize Firebase authentication
         function initFirebaseAuth() {
@@ -307,11 +366,20 @@
                         email: user.email
                     };
                     
+                    // Get user handle
+                    database.ref(`users/${user.uid}`).once('value', (snapshot) => {
+                        const userData = snapshot.val();
+                        if (userData && userData.handle) {
+                            currentUser.handle = userData.handle;
+                        }
+                    });
+                    
                     // Set user online status
                     setUserOnlineStatus(true);
                     
                     // Load contacts
                     loadContacts();
+                    loadHandleMap();
                     showChatApp();
                 } else {
                     setUserOnlineStatus(false);
@@ -349,6 +417,27 @@
             });
         }
 
+        // Load handle to UID mapping
+        function loadHandleMap() {
+            database.ref('userHandles').once('value', (snapshot) => {
+                const handles = snapshot.val() || {};
+                handleToUidMap = handles;
+            });
+            
+            // Listen for new handles
+            database.ref('userHandles').on('child_added', (snapshot) => {
+                handleToUidMap[snapshot.key] = snapshot.val();
+            });
+            
+            database.ref('userHandles').on('child_changed', (snapshot) => {
+                handleToUidMap[snapshot.key] = snapshot.val();
+            });
+            
+            database.ref('userHandles').on('child_removed', (snapshot) => {
+                delete handleToUidMap[snapshot.key];
+            });
+        }
+
         // Load contacts (other users)
         function loadContacts() {
             const usersRef = database.ref('users');
@@ -358,7 +447,8 @@
                     .filter(uid => uid !== currentUser.uid)
                     .map(uid => ({
                         uid,
-                        email: users[uid].email
+                        email: users[uid].email,
+                        handle: users[uid].handle || uid.substring(0, 8)
                     }));
                 
                 // Update contacts list
@@ -371,7 +461,8 @@
                 if (uid !== currentUser.uid) {
                     const newUser = {
                         uid,
-                        email: snapshot.val().email
+                        email: snapshot.val().email,
+                        handle: snapshot.val().handle || uid.substring(0, 8)
                     };
                     
                     // Add to contacts if not already there
@@ -433,15 +524,16 @@
                 contactElement.innerHTML = `
                     <div class="flex items-center">
                         <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                            <span>${contact.email.charAt(0).toUpperCase()}</span>
+                            <span>${contact.handle.charAt(0).toUpperCase()}</span>
                         </div>
                         <div class="ml-3 flex-1">
                             <div class="flex justify-between">
-                                <h3 class="font-medium text-gray-800">${contact.email}</h3>
+                                <h3 class="font-medium text-gray-800">${contact.handle}</h3>
                                 <span class="text-xs text-gray-500 last-message-time"></span>
                             </div>
                             <p class="text-sm text-gray-600 truncate last-message">Loading...</p>
                             <div class="contact-status">${statusHTML}</div>
+                            <div class="handle-tag mt-1">@${contact.handle}</div>
                         </div>
                     </div>
                 `;
@@ -465,8 +557,9 @@
             currentContact = contact.uid;
             
             // Update UI
-            document.getElementById('contact-name').textContent = contact.email;
-            document.getElementById('contact-initial').textContent = contact.email.charAt(0).toUpperCase();
+            document.getElementById('contact-name').textContent = contact.handle;
+            document.getElementById('contact-initial').textContent = contact.handle.charAt(0).toUpperCase();
+            document.getElementById('contact-handle').textContent = `@${contact.handle}`;
             
             // Show chat elements
             document.getElementById('chat-header').classList.remove('hidden');
@@ -583,6 +676,139 @@
             }
         }
 
+        // Search for users by handle
+        function searchByHandle() {
+            const searchInput = document.getElementById('search-handle');
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            if (searchTerm.length < 2) {
+                showSearchResults([
+                    { message: "Enter at least 2 characters to search", disabled: true }
+                ]);
+                return;
+            }
+            
+            // Filter handles
+            const results = [];
+            for (const handle in handleToUidMap) {
+                if (handle.toLowerCase().includes(searchTerm)) {
+                    results.push({
+                        handle: handle,
+                        uid: handleToUidMap[handle]
+                    });
+                }
+            }
+            
+            // If no results found
+            if (results.length === 0) {
+                showSearchResults([
+                    { message: "No users found with that handle", disabled: true }
+                ]);
+                return;
+            }
+            
+            // Display results
+            showSearchResults(results);
+        }
+
+        // Show search results
+        function showSearchResults(results) {
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '';
+            
+            if (results.length === 0 || (results[0].disabled && results[0].message.includes("Enter at least"))) {
+                resultsContainer.innerHTML = `
+                    <div class="text-center text-gray-500 py-4">
+                        Enter a handle to search for users
+                    </div>
+                `;
+                return;
+            }
+            
+            if (results[0].disabled) {
+                resultsContainer.innerHTML = `
+                    <div class="text-center text-gray-500 py-4">
+                        ${results[0].message}
+                    </div>
+                `;
+                return;
+            }
+            
+            results.forEach(result => {
+                if (result.uid === currentUser.uid) return; // Skip current user
+                
+                // Check if already a contact
+                const isContact = contacts.some(c => c.uid === result.uid);
+                
+                const resultElement = document.createElement('div');
+                resultElement.className = `p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-150 ${isContact ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`;
+                
+                // Get user details
+                database.ref(`users/${result.uid}`).once('value', (snapshot) => {
+                    const userData = snapshot.val();
+                    const email = userData ? userData.email : 'user@example.com';
+                    
+                    resultElement.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                <span>${result.handle.charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="font-medium text-gray-800">${result.handle}</h3>
+                                <p class="text-sm text-gray-500 truncate">${email}</p>
+                                <div class="handle-tag mt-1">@${result.handle}</div>
+                            </div>
+                            ${isContact ? 
+                                `<span class="ml-auto bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">Added</span>` : 
+                                `<button class="ml-auto add-contact-btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">Add</button>`}
+                        </div>
+                    `;
+                    
+                    if (!isContact) {
+                        const addButton = resultElement.querySelector('.add-contact-btn');
+                        addButton.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            addContact(result.uid, result.handle);
+                        });
+                    }
+                });
+                
+                resultElement.addEventListener('click', () => {
+                    if (!isContact) {
+                        addContact(result.uid, result.handle);
+                    }
+                });
+                
+                resultsContainer.appendChild(resultElement);
+            });
+        }
+
+        // Add a contact
+        function addContact(uid, handle) {
+            // Check if already a contact
+            if (contacts.some(c => c.uid === uid)) {
+                showError('login-error', 'This user is already in your contacts');
+                return;
+            }
+            
+            // Add to contacts list
+            const newContact = {
+                uid: uid,
+                handle: handle,
+                email: 'Loading...'
+            };
+            
+            contacts.push(newContact);
+            updateContactsList();
+            
+            // Show success message
+            showError('login-error', `Added @${handle} to your contacts!`);
+            
+            // Close add contact modal
+            document.getElementById('add-contact-page').classList.add('hidden');
+            document.getElementById('chat-app').classList.remove('hidden');
+        }
+
         // Initialize the chat app
         function initChatApp() {
             // Set up event listeners
@@ -627,6 +853,31 @@
                 });
             });
             
+            // Add contact button
+            document.getElementById('add-contact-btn').addEventListener('click', () => {
+                document.getElementById('chat-app').classList.add('hidden');
+                document.getElementById('add-contact-page').classList.remove('hidden');
+                
+                // Clear search results
+                document.getElementById('search-handle').value = '';
+                document.getElementById('search-results').innerHTML = `
+                    <div class="text-center text-gray-500 py-4">
+                        Enter a handle to search for users
+                    </div>
+                `;
+            });
+            
+            // Close add contact modal
+            document.getElementById('close-add-contact').addEventListener('click', () => {
+                document.getElementById('add-contact-page').classList.add('hidden');
+                document.getElementById('chat-app').classList.remove('hidden');
+            });
+            
+            // Search handle input
+            document.getElementById('search-handle').addEventListener('input', (e) => {
+                searchByHandle();
+            });
+            
             // Logout functionality
             document.getElementById('logout-btn').addEventListener('click', () => {
                 setUserOnlineStatus(false);
@@ -638,6 +889,7 @@
         function showLoginPage() {
             document.getElementById('login-page').classList.remove('hidden');
             document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('add-contact-page').classList.add('hidden');
             document.getElementById('chat-app').classList.add('hidden');
         }
 
@@ -645,6 +897,7 @@
         function showRegisterPage() {
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('register-page').classList.remove('hidden');
+            document.getElementById('add-contact-page').classList.add('hidden');
             document.getElementById('chat-app').classList.add('hidden');
         }
 
@@ -652,6 +905,7 @@
         function showChatApp() {
             document.getElementById('login-page').classList.add('hidden');
             document.getElementById('register-page').classList.add('hidden');
+            document.getElementById('add-contact-page').classList.add('hidden');
             document.getElementById('chat-app').classList.remove('hidden');
             initChatApp();
         }
@@ -690,6 +944,7 @@
         // Validate registration form
         function validateRegistrationForm() {
             const email = document.getElementById('register-email').value.trim();
+            const handle = document.getElementById('register-handle').value.trim();
             const password = document.getElementById('register-password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
             
@@ -697,6 +952,7 @@
             
             // Reset errors
             document.getElementById('register-email').classList.remove('input-error');
+            document.getElementById('register-handle').classList.remove('input-error');
             document.getElementById('register-password').classList.remove('input-error');
             document.getElementById('confirm-password').classList.remove('input-error');
             document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
@@ -707,6 +963,14 @@
             if (!emailRegex.test(email)) {
                 document.getElementById('register-email').classList.add('input-error');
                 document.getElementById('email-error').style.display = 'block';
+                isValid = false;
+            }
+            
+            // Handle validation
+            const handleRegex = /^[a-zA-Z0-9]{3,15}$/;
+            if (!handleRegex.test(handle)) {
+                document.getElementById('register-handle').classList.add('input-error');
+                document.getElementById('handle-error').style.display = 'block';
                 isValid = false;
             }
             
@@ -750,18 +1014,36 @@
             }
             
             const email = document.getElementById('register-email').value.trim();
+            const handle = document.getElementById('register-handle').value.trim();
             const password = document.getElementById('register-password').value;
+            
+            // Check if handle is available
+            if (handleToUidMap[handle]) {
+                document.getElementById('register-handle').classList.add('input-error');
+                document.getElementById('handle-error').textContent = 'Handle is already taken';
+                document.getElementById('handle-error').style.display = 'block';
+                return;
+            }
             
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     // Save user to database
                     const user = userCredential.user;
-                    database.ref('users/' + user.uid).set({
-                        email: user.email
-                    }).catch(error => {
-                        console.error("Error saving user to database:", error);
-                        showError('register-error', 'Account created but failed to save user data: ' + error.message);
-                    });
+                    const userData = {
+                        email: user.email,
+                        handle: handle
+                    };
+                    
+                    // Save user data
+                    database.ref('users/' + user.uid).set(userData)
+                        .then(() => {
+                            // Save handle to UID mapping
+                            return database.ref('userHandles/' + handle).set(user.uid);
+                        })
+                        .catch(error => {
+                            console.error("Error saving user data:", error);
+                            showError('register-error', 'Account created but failed to save user data: ' + error.message);
+                        });
                 })
                 .catch(error => {
                     console.error("Registration error:", error);
@@ -803,6 +1085,7 @@
             
             // Registration validation
             document.getElementById('register-email').addEventListener('blur', validateRegistrationForm);
+            document.getElementById('register-handle').addEventListener('blur', validateRegistrationForm);
             document.getElementById('register-password').addEventListener('blur', validateRegistrationForm);
             document.getElementById('confirm-password').addEventListener('blur', validateRegistrationForm);
         });
