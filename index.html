@@ -372,6 +372,16 @@
             <div id="conversations" class="flex-1 overflow-y-auto">
                 <!-- Contacts will be populated here -->
             </div>
+            
+            <!-- Account Deletion Button (Added Here) -->
+            <div class="p-4 border-t border-gray-200">
+                <button id="direct-delete-btn" class="w-full bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 rounded-lg transition duration-200">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Delete Account
+                </button>
+            </div>
         </div>
 
         <!-- Main Chat Area -->
@@ -934,6 +944,7 @@
             
             // Show loading state
             const deleteButton = document.getElementById('delete-account-btn');
+            const directDeleteButton = document.getElementById('direct-delete-btn');
             const originalText = deleteButton.innerHTML;
             deleteButton.innerHTML = `
                 <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -942,7 +953,15 @@
                 </svg>
                 Deleting...
             `;
+            directDeleteButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-red-700 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Deleting...
+            `;
             deleteButton.disabled = true;
+            directDeleteButton.disabled = true;
             
             // Delete user data from database
             const userRef = database.ref(`users/${currentUser.uid}`);
@@ -995,7 +1014,9 @@
                         
                         // Restore button state
                         deleteButton.innerHTML = originalText;
+                        directDeleteButton.innerHTML = 'Delete Account';
                         deleteButton.disabled = false;
+                        directDeleteButton.disabled = false;
                         
                         // Show error message
                         showError('login-error', `Failed to delete account: ${error.message}`);
@@ -1068,11 +1089,8 @@
                 document.getElementById('settings-page').classList.remove('hidden');
             });
             
-            // Close settings
-            document.getElementById('close-settings').addEventListener('click', () => {
-                document.getElementById('settings-page').classList.add('hidden');
-                document.getElementById('chat-app').classList.remove('hidden');
-            });
+            // Direct delete button (newly added)
+            document.getElementById('direct-delete-btn').addEventListener('click', deleteAccount);
             
             // Delete account button
             document.getElementById('delete-account-btn').addEventListener('click', deleteAccount);
@@ -1084,6 +1102,12 @@
             
             // Confirm delete
             document.getElementById('confirm-delete').addEventListener('click', confirmAccountDeletion);
+            
+            // Close settings
+            document.getElementById('close-settings').addEventListener('click', () => {
+                document.getElementById('settings-page').classList.add('hidden');
+                document.getElementById('chat-app').classList.remove('hidden');
+            });
             
             // Close add contact modal
             document.getElementById('close-add-contact').addEventListener('click', () => {
@@ -1265,8 +1289,8 @@
                             return database.ref('userHandles/' + handle).set(user.uid);
                         })
                         .catch(error => {
-                            console.error("Error saving user data:", error);
-                            showError('register-error', 'Account created but failed to save user data: ' + error.message);
+                            console.error("Error saving user ", error);
+                            showError('register-error', 'Account created but failed to save user  ' + error.message);
                         });
                 })
                 .catch(error => {
