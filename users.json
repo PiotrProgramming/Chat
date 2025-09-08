@@ -2,9 +2,5 @@
   {
     "login": "Piotr",
     "password": "Admin123"
-  },
-  {
-    "login": "Antolin",
-    "password": "client1"
   }
 ]
