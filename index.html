@@ -122,7 +122,7 @@
 
             <!-- Conversations List -->
             <div id="conversations" class="flex-1 overflow-y-auto">
-                <!-- Conversations will be populated here -->
+                <!-- Contacts will be populated here -->
             </div>
         </div>
 
@@ -132,11 +132,11 @@
             <div id="chat-header" class="bg-white border-b border-gray-200 p-4 hidden">
                 <div class="flex items-center">
                     <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
-                        <span id="client-initial">C</span>
+                        <span id="contact-initial">C</span>
                     </div>
                     <div class="ml-3">
-                        <h2 id="client-name" class="font-semibold text-gray-800">Client Name</h2>
-                        <p id="client-status" class="text-sm text-green-500">Online</p>
+                        <h2 id="contact-name" class="font-semibold text-gray-800">Contact Name</h2>
+                        <p id="contact-status" class="text-sm text-green-500">Online</p>
                     </div>
                 </div>
             </div>
@@ -146,7 +146,7 @@
                 <div class="max-w-3xl mx-auto">
                     <!-- Messages will be populated here -->
                     <div class="text-center text-gray-500 my-8 text-sm">
-                        Select a conversation to start chatting
+                        Select a contact to start chatting
                     </div>
                 </div>
             </div>
@@ -170,28 +170,21 @@
     </div>
 
     <script>
-        // Mock data for clients
-        const clients = [
-            { id: 1, name: "Sarah Johnson", email: "sarah@example.com", status: "online", avatar: "SJ" },
-            { id: 2, name: "Michael Chen", email: "michael@example.com", status: "away", avatar: "MC" },
-            { id: 3, name: "Emma Thompson", email: "emma@example.com", status: "online", avatar: "ET" },
-            { id: 4, name: "David Rodriguez", email: "david@example.com", status: "offline", avatar: "DR" },
-            { id: 5, name: "Lisa Park", email: "lisa@example.com", status: "online", avatar: "LP" }
-        ];
-
         let currentUser = null;
+        let allUsers = [];
+        let contacts = [];
         let conversations = {};
-        let currentClientId = null;
+        let currentContact = null;
 
         // Initialize conversations from localStorage
         function loadConversations() {
             const saved = localStorage.getItem(`chat_conversations_${currentUser}`);
             conversations = saved ? JSON.parse(saved) : {};
             
-            // Initialize conversations for all clients if empty
-            clients.forEach(client => {
-                if (!conversations[client.id]) {
-                    conversations[client.id] = [];
+            // Initialize conversations for all contacts if empty
+            contacts.forEach(contact => {
+                if (!conversations[contact.login]) {
+                    conversations[contact.login] = [];
                 }
             });
         }
@@ -207,27 +200,29 @@
             return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
 
-        // Create conversation element
-        function createConversationElement(client) {
-            const lastMessage = conversations[client.id].length > 0 
-                ? conversations[client.id][conversations[client.id].length - 1] 
+        // Get initial from username
+        function getInitial(username) {
+            return username.charAt(0).toUpperCase();
+        }
+
+        // Create contact element
+        function createContactElement(contact) {
+            const lastMessage = conversations[contact.login] && conversations[contact.login].length > 0 
+                ? conversations[contact.login][conversations[contact.login].length - 1] 
                 : null;
             
-            const conversation = document.createElement('div');
-            conversation.className = `p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition duration-150 ${currentClientId === client.id ? 'bg-blue-50 border-r-2 border-r-blue-500' : ''}`;
-            conversation.setAttribute('data-client-id', client.id);
+            const contactElement = document.createElement('div');
+            contactElement.className = `p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition duration-150 ${currentContact === contact.login ? 'bg-blue-50 border-r-2 border-r-blue-500' : ''}`;
+            contactElement.setAttribute('data-contact-login', contact.login);
             
-            conversation.innerHTML = `
+            contactElement.innerHTML = `
                 <div class="flex items-center">
-                    <div class="w-12 h-12 bg-${client.status === 'online' ? 'green' : client.status === 'away' ? 'yellow' : 'gray'}-500 rounded-full flex items-center justify-center text-white font-semibold relative">
-                        <span>${client.avatar}</span>
-                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-white rounded-full flex items-center justify-center">
-                            <span class="w-2 h-2 rounded-full bg-${client.status === 'online' ? 'green' : client.status === 'away' ? 'yellow' : 'gray'}-500"></span>
-                        </span>
+                    <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <span>${getInitial(contact.login)}</span>
                     </div>
                     <div class="ml-3 flex-1">
                         <div class="flex justify-between">
-                            <h3 class="font-medium text-gray-800">${client.name}</h3>
+                            <h3 class="font-medium text-gray-800">${contact.login}</h3>
                             <span class="text-xs text-gray-500">${lastMessage ? formatDate(lastMessage.timestamp) : ''}</span>
                         </div>
                         <p class="text-sm text-gray-600 truncate">${lastMessage ? lastMessage.text : 'No messages yet'}</p>
@@ -235,50 +230,50 @@
                 </div>
             `;
             
-            conversation.addEventListener('click', () => openConversation(client));
-            return conversation;
+            contactElement.addEventListener('click', () => openConversation(contact));
+            return contactElement;
         }
 
         // Open a conversation
-        function openConversation(client) {
-            currentClientId = client.id;
+        function openConversation(contact) {
+            currentContact = contact.login;
             
             // Update UI
-            document.getElementById('client-name').textContent = client.name;
-            document.getElementById('client-initial').textContent = client.avatar;
-            document.getElementById('client-status').textContent = client.status === 'online' ? 'Online' : client.status === 'away' ? 'Away' : 'Offline';
-            document.getElementById('client-status').className = `text-sm ${client.status === 'online' ? 'text-green-500' : client.status === 'away' ? 'text-yellow-500' : 'text-gray-500'}`;
+            document.getElementById('contact-name').textContent = contact.login;
+            document.getElementById('contact-initial').textContent = getInitial(contact.login);
+            document.getElementById('contact-status').textContent = 'Online';
+            document.getElementById('contact-status').className = 'text-sm text-green-500';
             
             // Show chat elements
             document.getElementById('chat-header').classList.remove('hidden');
             document.getElementById('message-input').classList.remove('hidden');
             
-            // Update conversations list
+            // Update contacts list
             document.querySelectorAll('#conversations > div').forEach(el => {
                 el.classList.remove('bg-blue-50', 'border-r-2', 'border-r-blue-500');
                 el.classList.add('hover:bg-gray-50');
             });
-            document.querySelector(`[data-client-id="${client.id}"]`).classList.remove('hover:bg-gray-50');
-            document.querySelector(`[data-client-id="${client.id}"]`).classList.add('bg-blue-50', 'border-r-2', 'border-r-blue-500');
+            document.querySelector(`[data-contact-login="${contact.login}"]`).classList.remove('hover:bg-gray-50');
+            document.querySelector(`[data-contact-login="${contact.login}"]`).classList.add('bg-blue-50', 'border-r-2', 'border-r-blue-500');
             
             // Load messages
-            loadMessages(client.id);
+            loadMessages(contact.login);
         }
 
         // Load messages for a conversation
-        function loadMessages(clientId) {
+        function loadMessages(contactLogin) {
             const messagesContainer = document.getElementById('messages');
             messagesContainer.innerHTML = '';
             
-            if (conversations[clientId] && conversations[clientId].length > 0) {
+            if (conversations[contactLogin] && conversations[contactLogin].length > 0) {
                 const messagesFragment = document.createDocumentFragment();
                 
-                conversations[clientId].forEach(message => {
+                conversations[contactLogin].forEach(message => {
                     const messageElement = document.createElement('div');
-                    messageElement.className = `mb-4 ${message.sender === 'client' ? 'text-left' : 'text-right'}`;
+                    messageElement.className = `mb-4 ${message.sender === contactLogin ? 'text-left' : 'text-right'}`;
                     
                     messageElement.innerHTML = `
-                        <div class="inline-block max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.sender === 'client' ? 'bg-white text-gray-800' : 'bg-blue-600 text-white'} shadow">
+                        <div class="inline-block max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.sender === contactLogin ? 'bg-white text-gray-800' : 'bg-blue-600 text-white'} shadow">
                             <p class="text-sm">${message.text}</p>
                             <p class="text-xs opacity-75 mt-1">${formatDate(message.timestamp)}</p>
                         </div>
@@ -295,7 +290,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                         </svg>
                         <p class="font-medium">No messages yet</p>
-                        <p class="text-sm">Start the conversation with ${clients.find(c => c.id === clientId).name}</p>
+                        <p class="text-sm">Start the conversation with ${contactLogin}</p>
                     </div>
                 `;
             }
@@ -309,16 +304,19 @@
             const messageInput = document.getElementById('message');
             const messageText = messageInput.value.trim();
             
-            if (messageText && currentClientId) {
+            if (messageText && currentContact) {
                 const newMessage = {
                     id: Date.now(),
                     text: messageText,
-                    sender: 'me',
+                    sender: currentUser,
                     timestamp: new Date().toISOString()
                 };
                 
                 // Add to conversations
-                conversations[currentClientId].push(newMessage);
+                if (!conversations[currentContact]) {
+                    conversations[currentContact] = [];
+                }
+                conversations[currentContact].push(newMessage);
                 
                 // Save to localStorage
                 saveConversations();
@@ -328,18 +326,18 @@
                 messageInput.style.height = 'auto';
                 
                 // Reload messages
-                loadMessages(currentClientId);
+                loadMessages(currentContact);
             }
         }
 
         // Initialize the chat app
         function initChatApp() {
-            // Populate conversations list
-            const conversationsContainer = document.getElementById('conversations');
-            conversationsContainer.innerHTML = '';
+            // Populate contacts list
+            const contactsContainer = document.getElementById('conversations');
+            contactsContainer.innerHTML = '';
             
-            clients.forEach(client => {
-                conversationsContainer.appendChild(createConversationElement(client));
+            contacts.forEach(contact => {
+                contactsContainer.appendChild(createContactElement(contact));
             });
             
             // Set up event listeners
@@ -361,10 +359,9 @@
             document.getElementById('search').addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase();
                 document.querySelectorAll('#conversations > div').forEach(el => {
-                    const clientName = el.querySelector('h3').textContent.toLowerCase();
-                    const clientEmail = el.querySelector('p').textContent.toLowerCase();
+                    const contactName = el.querySelector('h3').textContent.toLowerCase();
                     
-                    if (clientName.includes(searchTerm) || clientEmail.includes(searchTerm)) {
+                    if (contactName.includes(searchTerm)) {
                         el.style.display = 'block';
                     } else {
                         el.style.display = 'none';
@@ -380,9 +377,9 @@
                 showLoginPage();
             });
             
-            // Open first conversation by default
-            if (clients.length > 0) {
-                openConversation(clients[0]);
+            // Open first conversation by default if available
+            if (contacts.length > 0) {
+                openConversation(contacts[0]);
             }
         }
 
@@ -457,16 +454,20 @@
                 })
                 .then(users => {
                     // If we got users from fetch, use them, otherwise use fallback
-                    const validUsers = Array.isArray(users) ? users : fallbackUsers;
+                    allUsers = Array.isArray(users) ? users : fallbackUsers;
                     
                     // Find matching user (trim any whitespace from stored credentials)
-                    const user = validUsers.find(u => 
+                    const user = allUsers.find(u => 
                         u.login.trim() === username && 
                         u.password.trim() === password
                     );
                     
                     if (user) {
                         currentUser = username;
+                        
+                        // Set contacts (all users except current user)
+                        contacts = allUsers.filter(u => u.login !== currentUser);
+                        
                         localStorage.setItem('currentUser', username);
                         showChatApp();
                     } else {
@@ -483,6 +484,7 @@
                     
                     if (user) {
                         currentUser = username;
+                        contacts = fallbackUsers.filter(u => u.login !== currentUser);
                         localStorage.setItem('currentUser', username);
                         showChatApp();
                     } else {
@@ -515,7 +517,29 @@
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 currentUser = savedUser;
-                showChatApp();
+                
+                // Need to load users.json to get contacts
+                fetch('users.json')
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(users => {
+                        allUsers = users;
+                        contacts = allUsers.filter(u => u.login !== currentUser);
+                        showChatApp();
+                    })
+                    .catch(error => {
+                        console.error('Error loading users.json:', error);
+                        // Use fallback users if we can't load users.json
+                        const fallbackUsers = [
+                            { login: "admin", password: "password123" },
+                            { login: "user", password: "demo" }
+                        ];
+                        allUsers = fallbackUsers;
+                        contacts = fallbackUsers.filter(u => u.login !== currentUser);
+                        showChatApp();
+                    });
             } else {
                 showLoginPage();
             }
@@ -523,3 +547,32 @@
     </script>
 </body>
 </html>
+
+<!--
+users.json template (create this file in the same folder as index.html):
+
+[
+  {
+    "login": "admin",
+    "password": "password123"
+  },
+  {
+    "login": "client1",
+    "password": "securepass1"
+  },
+  {
+    "login": "client2",
+    "password": "securepass2"
+  }
+]
+
+IMPORTANT: This is for local development only. For production, you would need a server-side authentication system.
+Never store passwords in plain text in a real application - this is just for demonstration purposes.
+In a real implementation, passwords should be hashed and verified on the server.
+
+Troubleshooting:
+1. Make sure users.json is in the same folder as index.html
+2. Check that users.json has valid JSON format (use a JSON validator)
+3. Ensure there are no extra spaces in the username/password fields
+4. If using GitHub Pages, make sure the file is committed to your repository
+-->
