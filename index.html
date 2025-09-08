@@ -514,6 +514,9 @@
                 
                 // Scroll to bottom
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }).catch(error => {
+                console.error("Error loading messages:", error);
+                showError('login-error', 'Failed to load messages: ' + error.message);
             });
         }
 
@@ -569,6 +572,9 @@
                     recipientId: currentContact,
                     timestamp: firebase.database.ServerValue.TIMESTAMP,
                     delivered: true
+                }).catch(error => {
+                    console.error("Error sending message:", error);
+                    showError('login-error', 'Failed to send message: ' + error.message);
                 });
                 
                 // Clear input
@@ -732,6 +738,7 @@
             
             auth.signInWithEmailAndPassword(email, password)
                 .catch(error => {
+                    console.error("Login error:", error);
                     showError('login-error', error.message);
                 });
         }
@@ -751,9 +758,13 @@
                     const user = userCredential.user;
                     database.ref('users/' + user.uid).set({
                         email: user.email
+                    }).catch(error => {
+                        console.error("Error saving user to database:", error);
+                        showError('register-error', 'Account created but failed to save user data: ' + error.message);
                     });
                 })
                 .catch(error => {
+                    console.error("Registration error:", error);
                     showError('register-error', error.message);
                 });
         }
