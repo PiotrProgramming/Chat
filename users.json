@@ -1,4 +1,10 @@
 [
-Login: Piotr
-Hasło: Admin123
+  {
+    "login": "Piotr",
+    "password": "Admin123"
+  },
+  {
+    "login": "Antolin",
+    "password": "client1"
+  }
 ]
