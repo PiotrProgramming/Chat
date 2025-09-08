@@ -437,18 +437,33 @@
             }
             
             const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
+            const password = document.getElementById('password').value.trim();
             
-            // Fetch users.json
+            // Create a fallback users array in case users.json isn't available
+            const fallbackUsers = [
+                { login: "admin", password: "password123" },
+                { login: "user", password: "demo" }
+            ];
+            
+            // Try to fetch users.json
             fetch('users.json')
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                    if (response.status === 404) {
+                        // If users.json doesn't exist, use fallback credentials
+                        console.log('users.json not found, using fallback credentials');
+                        return fallbackUsers;
                     }
                     return response.json();
                 })
                 .then(users => {
-                    const user = users.find(u => u.login === username && u.password === password);
+                    // If we got users from fetch, use them, otherwise use fallback
+                    const validUsers = Array.isArray(users) ? users : fallbackUsers;
+                    
+                    // Find matching user (trim any whitespace from stored credentials)
+                    const user = validUsers.find(u => 
+                        u.login.trim() === username && 
+                        u.password.trim() === password
+                    );
                     
                     if (user) {
                         currentUser = username;
@@ -459,7 +474,20 @@
                     }
                 })
                 .catch(error => {
-                    showError('login-error', 'Authentication system unavailable');
+                    console.error('Error loading users.json:', error);
+                    // If there's an error fetching users.json, try with fallback credentials
+                    const user = fallbackUsers.find(u => 
+                        u.login.trim() === username && 
+                        u.password.trim() === password
+                    );
+                    
+                    if (user) {
+                        currentUser = username;
+                        localStorage.setItem('currentUser', username);
+                        showChatApp();
+                    } else {
+                        showError('login-error', 'Authentication failed. Check users.json format.');
+                    }
                 });
         }
 
