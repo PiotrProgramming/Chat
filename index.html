@@ -94,6 +94,13 @@
             border-radius: 4px;
             margin: 16px 0;
         }
+        .search-user-card {
+            transition: all 0.2s ease;
+        }
+        .search-user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -286,8 +293,8 @@
     <div id="add-contact-page" class="min-h-screen flex items-center justify-center p-4 hidden">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
             <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800">Add Contact</h2>
-                <p class="text-gray-500 mt-1">Find users by their handle</p>
+                <h2 class="text-xl font-bold text-gray-800">Find Users</h2>
+                <p class="text-gray-500 mt-1">Search for users by their handle</p>
             </div>
             
             <div class="p-6">
@@ -301,8 +308,14 @@
                 
                 <div id="search-results" class="space-y-3">
                     <!-- Search results will appear here -->
-                    <div class="text-center text-gray-500 py-4">
-                        Enter a handle to search for users
+                    <div class="text-center text-gray-500 py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium text-lg">Find people by handle</h3>
+                        <p class="text-gray-500 mt-2">Enter a handle above to search for users</p>
                     </div>
                 </div>
             </div>
@@ -361,12 +374,27 @@
                 </div>
             </div>
 
+            <!-- User Search Section -->
+            <div class="p-4 border-b border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-500 mb-2">FIND USERS</h3>
+                <div class="relative">
+                    <input type="text" id="user-search" placeholder="Search by handle..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <div id="user-search-results" class="mt-2 space-y-2 hidden">
+                    <!-- User search results will appear here -->
+                </div>
+            </div>
+
             <!-- Conversations List -->
             <div id="conversations" class="flex-1 overflow-y-auto">
                 <!-- Contacts will be populated here -->
             </div>
             
-            <!-- Account Deletion Button (Added Here) -->
+            <!-- Account Deletion Button -->
             <div class="p-4 border-t border-gray-200">
                 <button id="direct-delete-btn" class="w-full bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 rounded-lg transition duration-200">
                     <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -447,6 +475,7 @@
         let isOnline = false;
         let messageListeners = [];
         let handleToUidMap = {};
+        let userSearchTimeout = null;
 
         // Initialize Firebase authentication
         function initFirebaseAuth() {
@@ -810,8 +839,14 @@
             
             if (results.length === 0 || (results[0].disabled && results[0].message.includes("Enter at least"))) {
                 resultsContainer.innerHTML = `
-                    <div class="text-center text-gray-500 py-4">
-                        Enter a handle to search for users
+                    <div class="text-center text-gray-500 py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium text-lg">Find people by handle</h3>
+                        <p class="text-gray-500 mt-2">Enter a handle above to search for users</p>
                     </div>
                 `;
                 return;
@@ -819,8 +854,15 @@
             
             if (results[0].disabled) {
                 resultsContainer.innerHTML = `
-                    <div class="text-center text-gray-500 py-4">
-                        ${results[0].message}
+                    <div class="text-center text-gray-500 py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 01-5.656 0L3 15l1.172-1.172a4 4 0 015.656 0L12 16l2.828-2.828a4 4 0 015.656 0L21 15l-1.172 1.172a4 4 0 01-5.656 0L12 13.172l-2.828 2.828z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 7.172A4 4 0 015.656 6L5 5l.172-1.172a4 4 0 015.656 0L12 6l2.828-2.828a4 4 0 015.656 0L21 5l-1.172 1.172a4 4 0 01-5.656 0L12 4.172l-2.828 2.828z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium text-lg">No results found</h3>
+                        <p class="text-gray-500 mt-2">${results[0].message}</p>
                     </div>
                 `;
                 return;
@@ -833,7 +875,7 @@
                 const isContact = contacts.some(c => c.uid === result.uid);
                 
                 const resultElement = document.createElement('div');
-                resultElement.className = `p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-150 ${isContact ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`;
+                resultElement.className = `p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-150 search-user-card ${isContact ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`;
                 
                 // Get user details
                 database.ref(`users/${result.uid}`).once('value', (snapshot) => {
@@ -842,17 +884,17 @@
                     
                     resultElement.innerHTML = `
                         <div class="flex items-center">
-                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
                                 <span>${result.handle.charAt(0).toUpperCase()}</span>
                             </div>
-                            <div class="ml-3">
+                            <div class="ml-4 flex-1">
                                 <h3 class="font-medium text-gray-800">${result.handle}</h3>
                                 <p class="text-sm text-gray-500 truncate">${email}</p>
                                 <div class="handle-tag mt-1">@${result.handle}</div>
                             </div>
                             ${isContact ? 
-                                `<span class="ml-auto bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">Added</span>` : 
-                                `<button class="ml-auto add-contact-btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">Add</button>`}
+                                `<span class="ml-2 bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm">Added</span>` : 
+                                `<button class="ml-2 add-contact-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-medium">Add</button>`}
                         </div>
                     `;
                     
@@ -873,6 +915,109 @@
                 
                 resultsContainer.appendChild(resultElement);
             });
+        }
+
+        // Search users in real-time as they type
+        function searchUsersRealTime() {
+            const searchTerm = document.getElementById('user-search').value.trim().toLowerCase();
+            const resultsContainer = document.getElementById('user-search-results');
+            
+            // Clear previous timeout
+            if (userSearchTimeout) {
+                clearTimeout(userSearchTimeout);
+            }
+            
+            // Show loading indicator
+            resultsContainer.innerHTML = `
+                <div class="p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-3"></div>
+                        <span class="text-gray-700">Searching...</span>
+                    </div>
+                </div>
+            `;
+            resultsContainer.classList.remove('hidden');
+            
+            // Wait for user to stop typing
+            userSearchTimeout = setTimeout(() => {
+                if (searchTerm.length < 2) {
+                    resultsContainer.innerHTML = `
+                        <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <p class="text-yellow-700">Enter at least 2 characters to search</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Filter handles
+                const results = [];
+                for (const handle in handleToUidMap) {
+                    if (handle.toLowerCase().includes(searchTerm)) {
+                        results.push({
+                            handle: handle,
+                            uid: handleToUidMap[handle]
+                        });
+                    }
+                }
+                
+                // Display results
+                if (results.length === 0) {
+                    resultsContainer.innerHTML = `
+                        <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p class="text-red-700">No users found with that handle</p>
+                        </div>
+                    `;
+                } else {
+                    let resultsHTML = '';
+                    
+                    results.forEach(result => {
+                        if (result.uid === currentUser.uid) return; // Skip current user
+                        
+                        // Check if already a contact
+                        const isContact = contacts.some(c => c.uid === result.uid);
+                        
+                        resultsHTML += `
+                            <div class="p-3 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition duration-150 ${isContact ? 'opacity-50' : 'cursor-pointer'}">
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                        <span>${result.handle.charAt(0).toUpperCase()}</span>
+                                    </div>
+                                    <div class="ml-3 flex-1">
+                                        <h3 class="font-medium text-gray-800">${result.handle}</h3>
+                                        <div class="handle-tag mt-1">@${result.handle}</div>
+                                    </div>
+                                    ${isContact ? 
+                                        `<span class="ml-2 bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">Added</span>` : 
+                                        `<button class="ml-2 add-contact-btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">Add</button>`}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    resultsContainer.innerHTML = resultsHTML;
+                    
+                    // Add event listeners to the new buttons
+                    resultsContainer.querySelectorAll('.add-contact-btn').forEach((button, index) => {
+                        button.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            const result = results[index];
+                            addContact(result.uid, result.handle);
+                        });
+                    });
+                    
+                    // Add click listeners to the results
+                    resultsContainer.querySelectorAll('.hover\\:bg-gray-50').forEach((resultEl, index) => {
+                        const result = results[index];
+                        const isContact = contacts.some(c => c.uid === result.uid);
+                        
+                        if (!isContact) {
+                            resultEl.addEventListener('click', () => {
+                                addContact(result.uid, result.handle);
+                            });
+                        }
+                    });
+                }
+            }, 500); // Wait 500ms after user stops typing
         }
 
         // Add a contact
@@ -896,9 +1041,10 @@
             // Show success message
             showError('login-error', `Added @${handle} to your contacts!`);
             
-            // Close add contact modal
-            document.getElementById('add-contact-page').classList.add('hidden');
-            document.getElementById('chat-app').classList.remove('hidden');
+            // Clear search results
+            document.getElementById('user-search').value = '';
+            document.getElementById('user-search-results').innerHTML = '';
+            document.getElementById('user-search-results').classList.add('hidden');
         }
 
         // Update settings page with current user info
@@ -1050,6 +1196,9 @@
                 });
             });
             
+            // User search functionality
+            document.getElementById('user-search').addEventListener('input', searchUsersRealTime);
+            
             // Add contact button
             document.getElementById('add-contact-btn').addEventListener('click', () => {
                 document.getElementById('chat-app').classList.add('hidden');
@@ -1058,8 +1207,14 @@
                 // Clear search results
                 document.getElementById('search-handle').value = '';
                 document.getElementById('search-results').innerHTML = `
-                    <div class="text-center text-gray-500 py-4">
-                        Enter a handle to search for users
+                    <div class="text-center text-gray-500 py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium text-lg">Find people by handle</h3>
+                        <p class="text-gray-500 mt-2">Enter a handle above to search for users</p>
                     </div>
                 `;
             });
@@ -1071,7 +1226,7 @@
                 document.getElementById('settings-page').classList.remove('hidden');
             });
             
-            // Direct delete button (newly added)
+            // Direct delete button
             document.getElementById('direct-delete-btn').addEventListener('click', deleteAccount);
             
             // Delete account button
