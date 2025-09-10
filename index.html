@@ -101,6 +101,10 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+        .invitation-card {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -289,6 +293,38 @@
         </div>
     </div>
 
+    <!-- Remove Contact Confirmation Modal -->
+    <div id="remove-contact-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Remove Contact</h2>
+                
+                <div class="delete-warning mb-6">
+                    <p class="text-red-700 font-medium">This action cannot be undone!</p>
+                    <p class="text-red-600 mt-1">Removing this contact will:</p>
+                    <ul class="list-disc list-inside mt-2 text-red-600">
+                        <li>Delete the conversation history</li>
+                        <li>Remove the contact from your list</li>
+                        <li>Remove you from their contact list</li>
+                    </ul>
+                </div>
+                
+                <p class="text-gray-700 mb-6">
+                    Are you sure you want to remove <strong id="remove-contact-name">@handle</strong>?
+                </p>
+                
+                <div class="flex space-x-3">
+                    <button id="cancel-remove" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 rounded-lg transition duration-200">
+                        Cancel
+                    </button>
+                    <button id="confirm-remove" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2.5 rounded-lg transition duration-200">
+                        Yes, Remove Contact
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Contact Page -->
     <div id="add-contact-page" class="min-h-screen flex items-center justify-center p-4 hidden">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -328,6 +364,35 @@
         </div>
     </div>
 
+    <!-- Invitations Page -->
+    <div id="invitations-page" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800">Contact Requests</h2>
+                <p class="text-gray-500 mt-1">Manage your contact invitations</p>
+            </div>
+            
+            <div id="invitations-container" class="p-6">
+                <!-- Invitations will appear here -->
+                <div class="text-center text-gray-500 py-8">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                    </div>
+                    <h3 class="font-medium text-lg">No pending requests</h3>
+                    <p class="text-gray-500 mt-2">You don't have any pending contact requests</p>
+                </div>
+            </div>
+            
+            <div class="p-6 border-t border-gray-200">
+                <button id="close-invitations" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2.5 rounded-lg transition duration-200">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Chat App (Hidden Initially) -->
     <div id="chat-app" class="flex h-screen hidden">
         <!-- Sidebar -->
@@ -344,6 +409,11 @@
                     <p class="text-sm text-gray-500 mt-1">Real-time communication platform</p>
                 </div>
                 <div class="flex space-x-2">
+                    <button id="invitations-btn" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                    </button>
                     <button id="add-contact-btn" class="text-gray-500 hover:text-gray-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -404,6 +474,13 @@
                         <p id="contact-handle" class="handle-tag mt-1">@handle</p>
                     </div>
                 </div>
+                <div class="ml-auto flex space-x-2">
+                    <button id="remove-contact-btn" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Messages -->
@@ -453,6 +530,7 @@
         
         let currentUser = null;
         let contacts = [];
+        let invitations = [];
         let currentContact = null;
         let typingTimeout = null;
         let isTyping = false;
@@ -483,8 +561,9 @@
                     // Set user online status
                     setUserOnlineStatus(true);
                     
-                    // Load contacts
+                    // Load contacts and invitations
                     loadContacts();
+                    loadInvitations();
                     loadHandleMap();
                     showChatApp();
                 } else {
@@ -601,6 +680,104 @@
                 const uid = snapshot.key;
                 contacts = contacts.filter(c => c.uid !== uid);
                 updateContactsList();
+            });
+        }
+
+        // Load invitations
+        function loadInvitations() {
+            const invitationsRef = database.ref(`invitations/${currentUser.uid}`);
+            
+            invitationsRef.on('value', (snapshot) => {
+                const invitationUids = snapshot.val() || {};
+                const uidArray = Object.keys(invitationUids);
+                
+                if (uidArray.length === 0) {
+                    invitations = [];
+                    updateInvitationsList();
+                    return;
+                }
+                
+                // Get user details for each invitation
+                const usersRef = database.ref('users');
+                usersRef.once('value', (usersSnapshot) => {
+                    const users = usersSnapshot.val() || {};
+                    invitations = uidArray
+                        .filter(uid => users[uid])
+                        .map(uid => ({
+                            uid,
+                            email: users[uid].email,
+                            handle: users[uid].handle || uid.substring(0, 8)
+                        }));
+                    
+                    updateInvitationsList();
+                });
+            });
+        }
+
+        // Update invitations list UI
+        function updateInvitationsList() {
+            const invitationsContainer = document.getElementById('invitations-container');
+            invitationsContainer.innerHTML = '';
+            
+            if (invitations.length === 0) {
+                invitationsContainer.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium text-lg">No pending requests</h3>
+                        <p class="text-gray-500 mt-2">You don't have any pending contact requests</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            invitations.forEach(invitation => {
+                const invitationElement = document.createElement('div');
+                invitationElement.className = 'p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-150 invitation-card';
+                
+                // Get user details
+                database.ref(`users/${invitation.uid}`).once('value', (snapshot) => {
+                    const userData = snapshot.val();
+                    const email = userData ? userData.email : 'user@example.com';
+                    
+                    invitationElement.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                <span>${invitation.handle.charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <h3 class="font-medium text-gray-800">${invitation.handle}</h3>
+                                <p class="text-sm text-gray-500 truncate">${email}</p>
+                                <div class="handle-tag mt-1">@${invitation.handle}</div>
+                            </div>
+                            <div class="ml-2 space-x-2">
+                                <button class="accept-invitation-btn bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg font-medium">Accept</button>
+                                <button class="decline-invitation-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1.5 rounded-lg font-medium">Decline</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const acceptButton = invitationElement.querySelector('.accept-invitation-btn');
+                    acceptButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        acceptInvitation(invitation.uid, invitation.handle);
+                    });
+                    
+                    const declineButton = invitationElement.querySelector('.decline-invitation-btn');
+                    declineButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        declineInvitation(invitation.uid);
+                    });
+                });
+                
+                invitationElement.addEventListener('click', () => {
+                    // Do nothing on click, only handle button clicks
+                });
+                
+                invitationsContainer.appendChild(invitationElement);
             });
         }
 
@@ -898,8 +1075,11 @@
                 // Check if already a contact
                 const isContact = contacts.some(c => c.uid === result.uid);
                 
+                // Check if already sent an invitation
+                const isInvitationSent = invitations.some(i => i.uid === result.uid);
+                
                 const resultElement = document.createElement('div');
-                resultElement.className = `p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-150 search-user-card ${isContact ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`;
+                resultElement.className = `p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-150 search-user-card ${isContact || isInvitationSent ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`;
                 
                 // Get user details
                 database.ref(`users/${result.uid}`).once('value', (snapshot) => {
@@ -917,23 +1097,25 @@
                                 <div class="handle-tag mt-1">@${result.handle}</div>
                             </div>
                             ${isContact ? 
-                                `<span class="ml-2 bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm">Added</span>` : 
-                                `<button class="ml-2 add-contact-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-medium">Add</button>`}
+                                `<span class="ml-2 bg-gray-100 text-gray-700 px-3 py-1 rounded text-sm">Contact</span>` : 
+                                isInvitationSent ?
+                                    `<span class="ml-2 bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm">Pending</span>` :
+                                    `<button class="ml-2 add-contact-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded-lg font-medium">Invite</button>`}
                         </div>
                     `;
                     
-                    if (!isContact) {
+                    if (!isContact && !isInvitationSent) {
                         const addButton = resultElement.querySelector('.add-contact-btn');
                         addButton.addEventListener('click', (e) => {
                             e.stopPropagation();
-                            addContact(result.uid, result.handle);
+                            sendInvitation(result.uid, result.handle);
                         });
                     }
                 });
                 
                 resultElement.addEventListener('click', () => {
-                    if (!isContact) {
-                        addContact(result.uid, result.handle);
+                    if (!isContact && !isInvitationSent) {
+                        sendInvitation(result.uid, result.handle);
                     }
                 });
                 
@@ -941,39 +1123,138 @@
             });
         }
 
-        // Add a contact
-        function addContact(uid, handle) {
+        // Send invitation to a user
+        function sendInvitation(uid, handle) {
             // Check if already a contact
             if (contacts.some(c => c.uid === uid)) {
                 showError('login-error', 'This user is already in your contacts');
                 return;
             }
             
-            // Add to contacts list in Firebase
-            const contactsRef = database.ref(`contacts/${currentUser.uid}/${uid}`);
-            contactsRef.set(true)
+            // Check if invitation already sent
+            if (invitations.some(i => i.uid === uid)) {
+                showError('login-error', 'You have already sent an invitation to this user');
+                return;
+            }
+            
+            // Send invitation
+            const invitationRef = database.ref(`invitations/${uid}/${currentUser.uid}`);
+            invitationRef.set(true)
                 .then(() => {
-                    // Add to local contacts list
-                    const newContact = {
-                        uid: uid,
-                        handle: handle,
-                        email: 'Loading...'
-                    };
-                    
-                    contacts.push(newContact);
-                    updateContactsList();
-                    
-                    // Show success message
-                    showError('login-error', `Added @${handle} to your contacts!`);
+                    showError('login-error', `Invitation sent to @${handle}!`);
                     
                     // Close add contact modal
                     document.getElementById('add-contact-page').classList.add('hidden');
                     document.getElementById('chat-app').classList.remove('hidden');
                 })
                 .catch(error => {
-                    console.error("Error adding contact:", error);
-                    showError('login-error', `Failed to add contact: ${error.message}`);
+                    console.error("Error sending invitation:", error);
+                    showError('login-error', `Failed to send invitation: ${error.message}`);
                 });
+        }
+
+        // Accept invitation
+        function acceptInvitation(uid, handle) {
+            // Add both users to each other's contacts
+            const currentUserContactsRef = database.ref(`contacts/${currentUser.uid}/${uid}`);
+            const otherUserContactsRef = database.ref(`contacts/${uid}/${currentUser.uid}`);
+            
+            // Remove invitation
+            const invitationRef = database.ref(`invitations/${currentUser.uid}/${uid}`);
+            
+            // Create a transaction to ensure both operations succeed
+            database.ref().update({
+                [currentUserContactsRef.toString()]: true,
+                [otherUserContactsRef.toString()]: true,
+                [invitationRef.toString()]: null
+            })
+            .then(() => {
+                showError('login-error', `You're now connected with @${handle}!`);
+                
+                // Refresh invitations list
+                loadInvitations();
+            })
+            .catch(error => {
+                console.error("Error accepting invitation:", error);
+                showError('login-error', `Failed to accept invitation: ${error.message}`);
+            });
+        }
+
+        // Decline invitation
+        function declineInvitation(uid) {
+            // Remove invitation
+            const invitationRef = database.ref(`invitations/${currentUser.uid}/${uid}`);
+            
+            invitationRef.remove()
+                .then(() => {
+                    // Refresh invitations list
+                    loadInvitations();
+                })
+                .catch(error => {
+                    console.error("Error declining invitation:", error);
+                });
+        }
+
+        // Remove contact
+        function removeContact() {
+            if (!currentContact) return;
+            
+            // Find contact info
+            const contact = contacts.find(c => c.uid === currentContact);
+            if (!contact) return;
+            
+            // Update modal with contact name
+            document.getElementById('remove-contact-name').textContent = `@${contact.handle}`;
+            
+            // Show confirmation modal
+            document.getElementById('remove-contact-modal').classList.remove('hidden');
+        }
+
+        // Confirm contact removal
+        function confirmRemoveContact() {
+            if (!currentContact) return;
+            
+            // Hide modal
+            document.getElementById('remove-contact-modal').classList.add('hidden');
+            
+            // Remove both users from each other's contacts
+            const currentUserContactsRef = database.ref(`contacts/${currentUser.uid}/${currentContact}`);
+            const otherUserContactsRef = database.ref(`contacts/${currentContact}/${currentUser.uid}`);
+            
+            // Delete conversation
+            const conversationId = getConversationId(currentUser.uid, currentContact);
+            const conversationRef = database.ref(`conversations/${conversationId}`);
+            
+            // Create a transaction to ensure all operations succeed
+            database.ref().update({
+                [currentUserContactsRef.toString()]: null,
+                [otherUserContactsRef.toString()]: null,
+                [conversationRef.toString()]: null
+            })
+            .then(() => {
+                // Reset current contact
+                currentContact = null;
+                
+                // Hide chat header and input
+                document.getElementById('chat-header').classList.add('hidden');
+                document.getElementById('message-input').classList.add('hidden');
+                
+                // Update contacts list
+                updateContactsList();
+                
+                // Show success message
+                showError('login-error', 'Contact removed successfully!');
+            })
+            .catch(error => {
+                console.error("Error removing contact:", error);
+                showError('login-error', `Failed to remove contact: ${error.message}`);
+            });
+        }
+
+        // Add a contact
+        function addContact(uid, handle) {
+            // This function is no longer used directly
+            // We now use the invitation system
         }
 
         // Update settings page with current user info
@@ -1026,6 +1307,7 @@
             const statusRef = database.ref(`status/${currentUser.uid}`);
             const contactsRef = database.ref(`contacts/${currentUser.uid}`);
             const contactOfRef = database.ref(`contactOf/${currentUser.uid}`);
+            const invitationsRef = database.ref(`invitations/${currentUser.uid}`);
             
             // First, remove the user from all conversations
             database.ref('conversations').once('value', (snapshot) => {
@@ -1056,7 +1338,8 @@
                             handleRef.remove(),
                             statusRef.remove(),
                             contactsRef.remove(),
-                            contactOfRef.remove()
+                            contactOfRef.remove(),
+                            invitationsRef.remove()
                         ]);
                     })
                     .then(() => {
@@ -1149,6 +1432,15 @@
                 `;
             });
             
+            // Invitations button
+            document.getElementById('invitations-btn').addEventListener('click', () => {
+                document.getElementById('chat-app').classList.add('hidden');
+                document.getElementById('invitations-page').classList.remove('hidden');
+                
+                // Load invitations
+                loadInvitations();
+            });
+            
             // Settings button
             document.getElementById('settings-btn').addEventListener('click', () => {
                 updateSettingsPage();
@@ -1170,6 +1462,14 @@
             // Confirm delete
             document.getElementById('confirm-delete').addEventListener('click', confirmAccountDeletion);
             
+            // Cancel remove contact
+            document.getElementById('cancel-remove').addEventListener('click', () => {
+                document.getElementById('remove-contact-modal').classList.add('hidden');
+            });
+            
+            // Confirm remove contact
+            document.getElementById('confirm-remove').addEventListener('click', confirmRemoveContact);
+            
             // Close settings
             document.getElementById('close-settings').addEventListener('click', () => {
                 document.getElementById('settings-page').classList.add('hidden');
@@ -1181,6 +1481,15 @@
                 document.getElementById('add-contact-page').classList.add('hidden');
                 document.getElementById('chat-app').classList.remove('hidden');
             });
+            
+            // Close invitations modal
+            document.getElementById('close-invitations').addEventListener('click', () => {
+                document.getElementById('invitations-page').classList.add('hidden');
+                document.getElementById('chat-app').classList.remove('hidden');
+            });
+            
+            // Remove contact button
+            document.getElementById('remove-contact-btn').addEventListener('click', removeContact);
             
             // Search handle input
             document.getElementById('search-handle').addEventListener('input', (e) => {
@@ -1200,8 +1509,10 @@
             document.getElementById('register-page').classList.add('hidden');
             document.getElementById('settings-page').classList.add('hidden');
             document.getElementById('add-contact-page').classList.add('hidden');
+            document.getElementById('invitations-page').classList.add('hidden');
             document.getElementById('chat-app').classList.add('hidden');
             document.getElementById('delete-confirmation-modal').classList.add('hidden');
+            document.getElementById('remove-contact-modal').classList.add('hidden');
         }
 
         // Show register page
@@ -1210,8 +1521,10 @@
             document.getElementById('register-page').classList.remove('hidden');
             document.getElementById('settings-page').classList.add('hidden');
             document.getElementById('add-contact-page').classList.add('hidden');
+            document.getElementById('invitations-page').classList.add('hidden');
             document.getElementById('chat-app').classList.add('hidden');
             document.getElementById('delete-confirmation-modal').classList.add('hidden');
+            document.getElementById('remove-contact-modal').classList.add('hidden');
         }
 
         // Show chat app
@@ -1220,8 +1533,10 @@
             document.getElementById('register-page').classList.add('hidden');
             document.getElementById('settings-page').classList.add('hidden');
             document.getElementById('add-contact-page').classList.add('hidden');
+            document.getElementById('invitations-page').classList.add('hidden');
             document.getElementById('chat-app').classList.remove('hidden');
             document.getElementById('delete-confirmation-modal').classList.add('hidden');
+            document.getElementById('remove-contact-modal').classList.add('hidden');
             initChatApp();
         }
 
