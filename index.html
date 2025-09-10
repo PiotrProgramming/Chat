@@ -544,39 +544,63 @@
             });
         }
 
-        // Load contacts (other users)
+        // Load contacts (only those explicitly added)
         function loadContacts() {
-            const usersRef = database.ref('users');
-            usersRef.once('value', (snapshot) => {
-                const users = snapshot.val() || {};
-                contacts = Object.keys(users)
-                    .filter(uid => uid !== currentUser.uid)
-                    .map(uid => ({
-                        uid,
-                        email: users[uid].email,
-                        handle: users[uid].handle || uid.substring(0, 8)
-                    }));
+            const contactsRef = database.ref(`contacts/${currentUser.uid}`);
+            
+            contactsRef.once('value', (snapshot) => {
+                const contactUids = snapshot.val() || {};
+                const uidArray = Object.keys(contactUids);
                 
-                // Update contacts list
-                updateContactsList();
+                if (uidArray.length === 0) {
+                    contacts = [];
+                    updateContactsList();
+                    return;
+                }
+                
+                // Get user details for each contact
+                const usersRef = database.ref('users');
+                usersRef.once('value', (usersSnapshot) => {
+                    const users = usersSnapshot.val() || {};
+                    contacts = uidArray
+                        .filter(uid => users[uid])
+                        .map(uid => ({
+                            uid,
+                            email: users[uid].email,
+                            handle: users[uid].handle || uid.substring(0, 8)
+                        }));
+                    
+                    updateContactsList();
+                });
             });
             
-            // Listen for new users
-            usersRef.on('child_added', (snapshot) => {
+            // Listen for new contacts
+            contactsRef.on('child_added', (snapshot) => {
                 const uid = snapshot.key;
-                if (uid !== currentUser.uid) {
-                    const newUser = {
-                        uid,
-                        email: snapshot.val().email,
-                        handle: snapshot.val().handle || uid.substring(0, 8)
-                    };
-                    
-                    // Add to contacts if not already there
-                    if (!contacts.some(c => c.uid === uid)) {
-                        contacts.push(newUser);
-                        updateContactsList();
+                const usersRef = database.ref(`users/${uid}`);
+                usersRef.once('value', (userSnapshot) => {
+                    const userData = userSnapshot.val();
+                    if (userData) {
+                        const newContact = {
+                            uid,
+                            email: userData.email,
+                            handle: userData.handle || uid.substring(0, 8)
+                        };
+                        
+                        // Add to contacts if not already there
+                        if (!contacts.some(c => c.uid === uid)) {
+                            contacts.push(newContact);
+                            updateContactsList();
+                        }
                     }
-                }
+                });
+            });
+            
+            // Listen for removed contacts
+            contactsRef.on('child_removed', (snapshot) => {
+                const uid = snapshot.key;
+                contacts = contacts.filter(c => c.uid !== uid);
+                updateContactsList();
             });
         }
 
@@ -584,6 +608,21 @@
         function updateContactsList() {
             const contactsContainer = document.getElementById('conversations');
             contactsContainer.innerHTML = '';
+            
+            if (contacts.length === 0) {
+                contactsContainer.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium">No contacts yet</h3>
+                        <p class="text-sm mt-1">Click the + button to add contacts</p>
+                    </div>
+                `;
+                return;
+            }
             
             contacts.forEach(contact => {
                 const contactElement = document.createElement('div');
@@ -910,22 +949,31 @@
                 return;
             }
             
-            // Add to contacts list
-            const newContact = {
-                uid: uid,
-                handle: handle,
-                email: 'Loading...'
-            };
-            
-            contacts.push(newContact);
-            updateContactsList();
-            
-            // Show success message
-            showError('login-error', `Added @${handle} to your contacts!`);
-            
-            // Close add contact modal
-            document.getElementById('add-contact-page').classList.add('hidden');
-            document.getElementById('chat-app').classList.remove('hidden');
+            // Add to contacts list in Firebase
+            const contactsRef = database.ref(`contacts/${currentUser.uid}/${uid}`);
+            contactsRef.set(true)
+                .then(() => {
+                    // Add to local contacts list
+                    const newContact = {
+                        uid: uid,
+                        handle: handle,
+                        email: 'Loading...'
+                    };
+                    
+                    contacts.push(newContact);
+                    updateContactsList();
+                    
+                    // Show success message
+                    showError('login-error', `Added @${handle} to your contacts!`);
+                    
+                    // Close add contact modal
+                    document.getElementById('add-contact-page').classList.add('hidden');
+                    document.getElementById('chat-app').classList.remove('hidden');
+                })
+                .catch(error => {
+                    console.error("Error adding contact:", error);
+                    showError('login-error', `Failed to add contact: ${error.message}`);
+                });
         }
 
         // Update settings page with current user info
@@ -976,6 +1024,8 @@
             const userRef = database.ref(`users/${currentUser.uid}`);
             const handleRef = database.ref(`userHandles/${currentUser.handle}`);
             const statusRef = database.ref(`status/${currentUser.uid}`);
+            const contactsRef = database.ref(`contacts/${currentUser.uid}`);
+            const contactOfRef = database.ref(`contactOf/${currentUser.uid}`);
             
             // First, remove the user from all conversations
             database.ref('conversations').once('value', (snapshot) => {
@@ -1004,7 +1054,9 @@
                         return Promise.all([
                             userRef.remove(),
                             handleRef.remove(),
-                            statusRef.remove()
+                            statusRef.remove(),
+                            contactsRef.remove(),
+                            contactOfRef.remove()
                         ]);
                     })
                     .then(() => {
