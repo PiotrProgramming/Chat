@@ -1217,20 +1217,17 @@
             // Hide modal
             document.getElementById('remove-contact-modal').classList.add('hidden');
             
-            // Remove both users from each other's contacts
-            const currentUserContactsRef = database.ref(`contacts/${currentUser.uid}/${currentContact}`);
-            const otherUserContactsRef = database.ref(`contacts/${currentContact}/${currentUser.uid}`);
+            // Create update paths
+            const updates = {};
+            updates[`contacts/${currentUser.uid}/${currentContact}`] = null;
+            updates[`contacts/${currentContact}/${currentUser.uid}`] = null;
             
             // Delete conversation
             const conversationId = getConversationId(currentUser.uid, currentContact);
-            const conversationRef = database.ref(`conversations/${conversationId}`);
+            updates[`conversations/${conversationId}`] = null;
             
-            // Create a transaction to ensure all operations succeed
-            database.ref().update({
-                [currentUserContactsRef.toString()]: null,
-                [otherUserContactsRef.toString()]: null,
-                [conversationRef.toString()]: null
-            })
+            // Update database
+            database.ref().update(updates)
             .then(() => {
                 // Reset current contact
                 currentContact = null;
