@@ -513,16 +513,761 @@
                     <button id="add-contact-btn" class="text-gray-500 hover:text-gray-700">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        }).catch(error => {
-                            console.error("Error sending message:", error);
-                            showError('login-error', 'Failed to send message: ' + error.message);
-                        });
-                        
-                        // Clear input
-                        messageInput.value = '';
-                        messageInput.style.height = 'auto';
-                    }
+                        </svg>
+                    </button>
+                    <button id="settings-btn" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.927-1.756 3.353 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.927 0 3.353a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.927 1.756-3.353 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.927 0-3.353a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                    <button id="logout-btn" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="p-4 border-b border-gray-200">
+                <div class="relative">
+                    <input type="text" id="search" placeholder="Search conversations..." 
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Conversations List -->
+            <div id="conversations" class="flex-1 overflow-y-auto">
+                <!-- Contacts will be populated here -->
+            </div>
+            
+            <!-- Account Deletion Button -->
+            <div class="p-4 border-t border-gray-200">
+                <button id="direct-delete-btn" class="w-full bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 rounded-lg transition duration-200">
+                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Delete Account
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col">
+            <!-- Chat Header -->
+            <div id="chat-header" class="bg-white border-b border-gray-200 p-4 hidden">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                        <span id="contact-initial">C</span>
+                    </div>
+                    <div class="ml-3">
+                        <h2 id="contact-name" class="font-semibold text-gray-800">Contact Name</h2>
+                        <p id="contact-status" class="text-sm"><span class="online-dot"></span>Online</p>
+                        <p id="contact-handle" class="handle-tag mt-1">@handle</p>
+                    </div>
+                </div>
+                <div class="ml-auto flex space-x-2">
+                    <button id="remove-contact-btn" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="messages" class="flex-1 message-container bg-gray-100 p-4 overflow-y-auto">
+                <div class="max-w-3xl mx-auto">
+                    <!-- Messages will be populated here -->
+                    <div class="text-center text-gray-500 my-8 text-sm">
+                        Select a contact to start chatting
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Input -->
+            <div id="message-input" class="bg-white border-t border-gray-200 p-4 hidden">
+                <div class="max-w-3xl mx-auto">
+                    <div class="flex items-end">
+                        <textarea id="message" placeholder="Type your message..." 
+                                  class="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 resize-none chat-input"
+                                  rows="1"></textarea>
+                        <button id="send-btn" class="ml-3 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition duration-200">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Firebase with your configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCxb81EnlyI3vpzul7IzmxECfXFxIM6KfU",
+            authDomain: "chat-85393.firebaseapp.com",
+            projectId: "chat-85393",
+            storageBucket: "chat-85393.firebasestorage.app",
+            messagingSenderId: "730787695946",
+            appId: "1:730787695946:web:278c457a89a75dc2dbc5b3",
+            measurementId: "G-K71Z3979SZ"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+        
+        let currentUser = null;
+        let contacts = [];
+        let invitations = [];
+        let currentContact = null;
+        let typingTimeout = null;
+        let isTyping = false;
+        let onlineStatusRef = null;
+        let isOnline = false;
+        let messageListeners = [];
+        let handleToUidMap = {};
+        let userSearchTimeout = null;
+        let selectedMessage = null;
+
+        // Initialize Firebase authentication
+        function initFirebaseAuth() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = {
+                        uid: user.uid,
+                        email: user.email
+                    };
+                    
+                    // Get user handle
+                    database.ref(`users/${user.uid}`).once('value', (snapshot) => {
+                        const userData = snapshot.val();
+                        if (userData && userData.handle) {
+                            currentUser.handle = userData.handle;
+                            updateSettingsPage();
+                        }
+                    });
+                    
+                    // Set user online status
+                    setUserOnlineStatus(true);
+                    
+                    // Load contacts and invitations
+                    loadContacts();
+                    loadInvitations();
+                    loadHandleMap();
+                    showChatApp();
+                } else {
+                    setUserOnlineStatus(false);
+                    currentUser = null;
+                    showLoginPage();
                 }
+            });
+        }
+
+        // Set user online status
+        function setUserOnlineStatus(status) {
+            if (!currentUser) return;
+            
+            isOnline = status;
+            
+            const userStatusRef = database.ref(`status/${currentUser.uid}`);
+            
+            // Create a reference to the current user's status
+            onlineStatusRef = database.ref('.info/connected');
+            
+            onlineStatusRef.on('value', (snapshot) => {
+                if (snapshot.val() == false) return;
+                
+                userStatusRef.onDisconnect()
+                    .set({ 
+                        state: 'offline', 
+                        lastChanged: firebase.database.ServerValue.TIMESTAMP 
+                    })
+                    .then(() => {
+                        userStatusRef.set({ 
+                            state: status ? 'online' : 'offline', 
+                            lastChanged: firebase.database.ServerValue.TIMESTAMP 
+                        });
+                    });
+            });
+        }
+
+        // Load handle to UID mapping
+        function loadHandleMap() {
+            database.ref('userHandles').once('value', (snapshot) => {
+                const handles = snapshot.val() || {};
+                handleToUidMap = handles;
+            });
+            
+            // Listen for new handles
+            database.ref('userHandles').on('child_added', (snapshot) => {
+                handleToUidMap[snapshot.key] = snapshot.val();
+            });
+            
+            database.ref('userHandles').on('child_changed', (snapshot) => {
+                handleToUidMap[snapshot.key] = snapshot.val();
+            });
+            
+            database.ref('userHandles').on('child_removed', (snapshot) => {
+                delete handleToUidMap[snapshot.key];
+            });
+        }
+
+        // Load contacts (only those explicitly added)
+        function loadContacts() {
+            const contactsRef = database.ref(`contacts/${currentUser.uid}`);
+            
+            contactsRef.once('value', (snapshot) => {
+                const contactUids = snapshot.val() || {};
+                const uidArray = Object.keys(contactUids);
+                
+                if (uidArray.length === 0) {
+                    contacts = [];
+                    updateContactsList();
+                    return;
+                }
+                
+                // Get user details for each contact
+                const usersRef = database.ref('users');
+                usersRef.once('value', (usersSnapshot) => {
+                    const users = usersSnapshot.val() || {};
+                    contacts = uidArray
+                        .filter(uid => users[uid])
+                        .map(uid => ({
+                            uid,
+                            email: users[uid].email,
+                            handle: users[uid].handle || uid.substring(0, 8)
+                        }));
+                    
+                    updateContactsList();
+                });
+            });
+            
+            // Listen for new contacts
+            contactsRef.on('child_added', (snapshot) => {
+                const uid = snapshot.key;
+                const usersRef = database.ref(`users/${uid}`);
+                usersRef.once('value', (userSnapshot) => {
+                    const userData = userSnapshot.val();
+                    if (userData) {
+                        const newContact = {
+                            uid,
+                            email: userData.email,
+                            handle: userData.handle || uid.substring(0, 8)
+                        };
+                        
+                        // Add to contacts if not already there
+                        if (!contacts.some(c => c.uid === uid)) {
+                            contacts.push(newContact);
+                            updateContactsList();
+                        }
+                    }
+                });
+            });
+            
+            // Listen for removed contacts
+            contactsRef.on('child_removed', (snapshot) => {
+                const uid = snapshot.key;
+                contacts = contacts.filter(c => c.uid !== uid);
+                updateContactsList();
+            });
+        }
+
+        // Load invitations
+        function loadInvitations() {
+            const invitationsRef = database.ref(`invitations/${currentUser.uid}`);
+            
+            invitationsRef.on('value', (snapshot) => {
+                const invitationUids = snapshot.val() || {};
+                const uidArray = Object.keys(invitationUids);
+                
+                if (uidArray.length === 0) {
+                    invitations = [];
+                    updateInvitationsList();
+                    return;
+                }
+                
+                // Get user details for each invitation
+                const usersRef = database.ref('users');
+                usersRef.once('value', (usersSnapshot) => {
+                    const users = usersSnapshot.val() || {};
+                    invitations = uidArray
+                        .filter(uid => users[uid])
+                        .map(uid => ({
+                            uid,
+                            email: users[uid].email,
+                            handle: users[uid].handle || uid.substring(0, 8)
+                        }));
+                    
+                    updateInvitationsList();
+                });
+            });
+        }
+
+        // Update invitations list UI
+        function updateInvitationsList() {
+            const invitationsContainer = document.getElementById('invitations-container');
+            invitationsContainer.innerHTML = '';
+            
+            if (invitations.length === 0) {
+                invitationsContainer.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium text-lg">No pending requests</h3>
+                        <p class="text-gray-500 mt-2">You don't have any pending contact requests</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            invitations.forEach(invitation => {
+                const invitationElement = document.createElement('div');
+                invitationElement.className = 'p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition duration-150 invitation-card';
+                
+                // Get user details
+                database.ref(`users/${invitation.uid}`).once('value', (snapshot) => {
+                    const userData = snapshot.val();
+                    const email = userData ? userData.email : 'user@example.com';
+                    
+                    invitationElement.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                <span>${invitation.handle.charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div class="ml-4 flex-1">
+                                <h3 class="font-medium text-gray-800">${invitation.handle}</h3>
+                                <p class="text-sm text-gray-500 truncate">${email}</p>
+                                <div class="handle-tag mt-1">@${invitation.handle}</div>
+                            </div>
+                            <div class="ml-2 space-x-2">
+                                <button class="accept-invitation-btn bg-green-600 hover:bg-green-700 text-white px-4 py-1.5 rounded-lg font-medium">Accept</button>
+                                <button class="decline-invitation-btn bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1.5 rounded-lg font-medium">Decline</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const acceptButton = invitationElement.querySelector('.accept-invitation-btn');
+                    acceptButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        acceptInvitation(invitation.uid, invitation.handle);
+                    });
+                    
+                    const declineButton = invitationElement.querySelector('.decline-invitation-btn');
+                    declineButton.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        declineInvitation(invitation.uid);
+                    });
+                });
+                
+                invitationElement.addEventListener('click', () => {
+                    // Do nothing on click, only handle button clicks
+                });
+                
+                invitationsContainer.appendChild(invitationElement);
+            });
+        }
+
+        // Update contacts list UI
+        function updateContactsList() {
+            const contactsContainer = document.getElementById('conversations');
+            contactsContainer.innerHTML = '';
+            
+            if (contacts.length === 0) {
+                contactsContainer.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="font-medium">No contacts yet</h3>
+                        <p class="text-sm mt-1">Click the + button to add contacts</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            contacts.forEach(contact => {
+                const contactElement = document.createElement('div');
+                contactElement.className = `p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition duration-150 ${currentContact === contact.uid ? 'bg-blue-50 border-r-2 border-r-blue-500' : ''}`;
+                contactElement.setAttribute('data-contact-uid', contact.uid);
+                
+                // Get status
+                let statusHTML = '<span class="offline-dot"></span>Offline';
+                const statusRef = database.ref(`status/${contact.uid}`);
+                statusRef.on('value', (snapshot) => {
+                    const status = snapshot.val();
+                    if (status && status.state === 'online') {
+                        statusHTML = '<span class="online-dot"></span>Online';
+                        if (currentContact === contact.uid) {
+                            document.getElementById('contact-status').innerHTML = statusHTML;
+                        }
+                    } else {
+                        statusHTML = '<span class="offline-dot"></span>Offline';
+                    }
+                    
+                    if (contactElement.querySelector('.contact-status')) {
+                        contactElement.querySelector('.contact-status').innerHTML = statusHTML;
+                    }
+                });
+                
+                // Get last message
+                const conversationId = getConversationId(currentUser.uid, contact.uid);
+                const messagesRef = database.ref(`conversations/${conversationId}/messages`);
+                
+                messagesRef.limitToLast(1).on('child_added', (snapshot) => {
+                    const message = snapshot.val();
+                    const lastMessageEl = contactElement.querySelector('.last-message');
+                    if (lastMessageEl) {
+                        lastMessageEl.textContent = message.text;
+                    }
+                    
+                    const timeEl = contactElement.querySelector('.last-message-time');
+                    if (timeEl) {
+                        const date = new Date(message.timestamp);
+                        timeEl.textContent = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    }
+                });
+                
+                contactElement.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                            <span>${contact.handle.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <div class="flex justify-between">
+                                <h3 class="font-medium text-gray-800">${contact.handle}</h3>
+                                <span class="text-xs text-gray-500 last-message-time"></span>
+                            </div>
+                            <p class="text-sm text-gray-600 truncate last-message">Loading...</p>
+                            <div class="contact-status">${statusHTML}</div>
+                            <div class="handle-tag mt-1">@${contact.handle}</div>
+                        </div>
+                    </div>
+                `;
+                
+                contactElement.addEventListener('click', () => openConversation(contact));
+                contactsContainer.appendChild(contactElement);
+            });
+        }
+
+        // Get conversation ID (sorted to ensure consistency)
+        function getConversationId(uid1, uid2) {
+            return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
+        }
+
+        // Open a conversation
+        function openConversation(contact) {
+            // Remove previous message listeners
+            messageListeners.forEach(listener => listener.off('child_added'));
+            messageListeners = [];
+            
+            currentContact = contact.uid;
+            
+            // Update UI
+            document.getElementById('contact-name').textContent = contact.handle;
+            document.getElementById('contact-initial').textContent = contact.handle.charAt(0).toUpperCase();
+            document.getElementById('contact-handle').textContent = `@${contact.handle}`;
+            
+            // Show chat elements
+            document.getElementById('chat-header').classList.remove('hidden');
+            document.getElementById('message-input').classList.remove('hidden');
+            
+            // Update contacts list
+            document.querySelectorAll('#conversations > div').forEach(el => {
+                el.classList.remove('bg-blue-50', 'border-r-2', 'border-r-blue-500');
+                el.classList.add('hover:bg-gray-50');
+            });
+            document.querySelector(`[data-contact-uid="${contact.uid}"]`).classList.remove('hover:bg-gray-50');
+            document.querySelector(`[data-contact-uid="${contact.uid}"]`).classList.add('bg-blue-50', 'border-r-2', 'border-r-blue-500');
+            
+            // Load messages
+            loadMessages();
+            
+            // Listen for new messages
+            const conversationId = getConversationId(currentUser.uid, contact.uid);
+            const messagesRef = database.ref(`conversations/${conversationId}/messages`);
+            const messagesListener = messagesRef.limitToLast(50).on('child_added', (snapshot) => {
+                const message = snapshot.val();
+                message.id = snapshot.key;
+                addMessageToUI(message);
+            });
+            
+            messageListeners.push(messagesRef);
+            
+            // Mark all messages from this contact as read
+            const updates = {};
+            updates[`conversations/${conversationId}/messagesRead/${currentUser.uid}`] = true;
+            database.ref().update(updates);
+        }
+
+        // Load messages for a conversation
+        function loadMessages() {
+            if (!currentContact) return;
+            
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '';
+            
+            const conversationId = getConversationId(currentUser.uid, currentContact);
+            const messagesRef = database.ref(`conversations/${conversationId}/messages`);
+            
+            messagesRef.orderByChild('timestamp').limitToLast(50).once('value', (snapshot) => {
+                snapshot.forEach(childSnapshot => {
+                    const message = childSnapshot.val();
+                    message.id = childSnapshot.key;
+                    addMessageToUI(message);
+                });
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }).catch(error => {
+                console.error("Error loading messages:", error);
+                showError('login-error', 'Failed to load messages: ' + error.message);
+            });
+        }
+
+        // Add message to UI
+        function addMessageToUI(message) {
+            const messagesContainer = document.getElementById('messages');
+            
+            // Skip if not for current conversation
+            if (message.senderId !== currentContact && 
+                message.recipientId !== currentContact &&
+                message.senderId !== currentUser.uid) {
+                return;
+            }
+            
+            // Check if already in UI
+            if (document.getElementById(`message-${message.id}`)) {
+                return;
+            }
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `mb-4 ${message.senderId === currentUser.uid ? 'text-right' : 'text-left'}`;
+            messageElement.id = `message-${message.id}`;
+            
+            // Format timestamp
+            const date = new Date(message.timestamp);
+            const timeString = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            // Delivery status
+            let deliveryStatus = '<span class="delivered-icon">✓</span>';
+            if (message.delivered) {
+                deliveryStatus = '<span class="delivered-icon">✓✓</span>';
+            }
+            if (message.read) {
+                deliveryStatus = '<span class="read-icon">✓✓</span>';
+            }
+            
+            // Only show options for user's own messages
+            const optionsHTML = message.senderId === currentUser.uid ? `
+                <div class="message-options" id="options-${message.id}">
+                    <div class="message-option edit-message" data-message-id="${message.id}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Edit
+                    </div>
+                    <div class="message-option delete-message" data-message-id="${message.id}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Delete
+                    </div>
+                </div>
+            ` : '';
+            
+            // Add edit input if editing this message
+            const editInputHTML = message.senderId === currentUser.uid ? `
+                <div class="edit-message-input" id="edit-input-${message.id}">
+                    <input type="text" class="w-full px-2 py-1 border border-gray-300 rounded" value="${message.text}" />
+                </div>
+                <div class="edit-actions" id="edit-actions-${message.id}">
+                    <button class="save-edit bg-blue-600 text-white px-2 py-1 rounded">Save</button>
+                    <button class="cancel-edit bg-gray-300 px-2 py-1 rounded">Cancel</button>
+                </div>
+            ` : '';
+            
+            messageElement.innerHTML = `
+                <div class="inline-block max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.senderId === currentUser.uid ? 'bg-blue-600 text-white' : 'bg-white text-gray-800'} shadow relative">
+                    <div class="flex items-center justify-between">
+                        <p class="text-sm message-text">${message.text}</p>
+                        <div class="message-actions">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    ${message.edited ? '<span class="edited-indicator text-xs opacity-50 ml-1">(edited)</span>' : ''}
+                    <p class="text-xs opacity-75 mt-1 flex justify-between">
+                        <span>${timeString}</span>
+                        ${message.senderId === currentUser.uid ? 
+                            `<span class="delivery-status">${deliveryStatus}</span>` : ''}
+                    </p>
+                    ${optionsHTML}
+                    ${editInputHTML}
+                </div>
+            `;
+            
+            // Add context menu for mobile
+            messageElement.addEventListener('contextmenu', (e) => {
+                if (message.senderId === currentUser.uid) {
+                    e.preventDefault();
+                    showOptionsForMessage(message.id);
+                }
+            });
+            
+            // Add click handler for message actions
+            const messageActions = messageElement.querySelector('.message-actions');
+            if (messageActions) {
+                messageActions.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showOptionsForMessage(message.id);
+                });
+            }
+            
+            // Close options when clicking elsewhere
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.message-options') && !e.target.closest('.message-bubble')) {
+                    document.querySelectorAll('.message-options').forEach(el => {
+                        el.classList.remove('show');
+                    });
+                }
+            });
+            
+            // Add click handler for delete option
+            const deleteOption = messageElement.querySelector('.delete-message');
+            if (deleteOption) {
+                deleteOption.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedMessage = message;
+                    document.getElementById('delete-message-modal').classList.remove('hidden');
+                });
+            }
+            
+            // Add click handler for edit option
+            const editOption = messageElement.querySelector('.edit-message');
+            if (editOption) {
+                editOption.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedMessage = message;
+                    
+                    // Show edit input
+                    const editInput = document.getElementById(`edit-input-${message.id}`);
+                    const editActions = document.getElementById(`edit-actions-${message.id}`);
+                    if (editInput && editActions) {
+                        editInput.style.display = 'block';
+                        editActions.style.display = 'flex';
+                        
+                        // Hide options
+                        document.getElementById(`options-${message.id}`).classList.remove('show');
+                    }
+                });
+            }
+            
+            // Add click handler for save edit
+            const saveEdit = messageElement.querySelector('.save-edit');
+            if (saveEdit) {
+                saveEdit.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editMessage();
+                });
+            }
+            
+            // Add click handler for cancel edit
+            const cancelEdit = messageElement.querySelector('.cancel-edit');
+            if (cancelEdit) {
+                cancelEdit.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    cancelEditMessage();
+                });
+            }
+            
+            messagesContainer.appendChild(messageElement);
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Set up delivery confirmation listener
+            if (message.senderId === currentUser.uid) {
+                const conversationId = getConversationId(currentUser.uid, currentContact);
+                const deliveryRef = database.ref(`conversations/${conversationId}/messages/${message.id}/delivered`);
+                deliveryRef.on('value', (snapshot) => {
+                    const delivered = snapshot.val();
+                    if (delivered) {
+                        const statusElement = messageElement.querySelector('.delivery-status');
+                        if (statusElement) {
+                            statusElement.innerHTML = '<span class="delivered-icon">✓✓</span>';
+                        }
+                    }
+                });
+                
+                // Set up read confirmation listener
+                const readRef = database.ref(`conversations/${conversationId}/messages/${message.id}/read`);
+                readRef.on('value', (snapshot) => {
+                    const read = snapshot.val();
+                    if (read) {
+                        const statusElement = messageElement.querySelector('.delivery-status');
+                        if (statusElement) {
+                            statusElement.innerHTML = '<span class="read-icon">✓✓</span>';
+                        }
+                    }
+                });
+            }
+        }
+
+        // Show options for a specific message
+        function showOptionsForMessage(messageId) {
+            // Hide all other options
+            document.querySelectorAll('.message-options').forEach(el => {
+                el.classList.remove('show');
+            });
+            
+            // Show options for this message
+            const optionsElement = document.getElementById(`options-${messageId}`);
+            if (optionsElement) {
+                optionsElement.classList.add('show');
+            }
+        }
+
+        // Send a message
+        function sendMessage() {
+            const messageInput = document.getElementById('message');
+            const messageText = messageInput.value.trim();
+            
+            if (messageText && currentContact) {
+                const conversationId = getConversationId(currentUser.uid, currentContact);
+                const messagesRef = database.ref(`conversations/${conversationId}/messages`);
+                
+                // Add message to database
+                const newMessageRef = messagesRef.push();
+                newMessageRef.set({
+                    text: messageText,
+                    senderId: currentUser.uid,
+                    recipientId: currentContact,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    delivered: false,
+                    read: false
+                }).then(() => {
+                    // Mark as delivered
+                    newMessageRef.update({
+                        delivered: true
+                    });
+                }).catch(error => {
+                    console.error("Error sending message:", error);
+                    showError('login-error', 'Failed to send message: ' + error.message);
+                });
                 
                 // Clear input
                 messageInput.value = '';
@@ -534,7 +1279,7 @@
         function editMessage() {
             const messageInput = document.getElementById('message');
             const editInput = document.getElementById(`edit-input-${selectedMessage.id}`);
-            const editedText = editInput.value.trim();
+            const editedText = editInput.querySelector('input').value.trim();
             
             if (editedText && selectedMessage) {
                 const conversationId = getConversationId(currentUser.uid, currentContact);
@@ -554,18 +1299,16 @@
                         const messageText = messageElement.querySelector('.message-text');
                         if (messageText) {
                             messageText.textContent = editedText;
-                            messageText.style.fontStyle = 'italic';
                         }
                         
-                        const editedIndicator = messageElement.querySelector('.edited-indicator');
-                        if (editedIndicator) {
-                            editedIndicator.style.display = 'inline';
-                        } else {
-                            const indicator = document.createElement('span');
-                            indicator.className = 'edited-indicator text-xs opacity-50 ml-1';
-                            indicator.textContent = '(edited)';
-                            messageText.parentNode.appendChild(indicator);
+                        // Show edited indicator
+                        let editedIndicator = messageElement.querySelector('.edited-indicator');
+                        if (!editedIndicator) {
+                            editedIndicator = document.createElement('span');
+                            editedIndicator.className = 'edited-indicator text-xs opacity-50 ml-1';
+                            messageElement.querySelector('.message-text').parentNode.appendChild(editedIndicator);
                         }
+                        editedIndicator.textContent = '(edited)';
                     }
                     
                     // Clear selected message
@@ -578,14 +1321,45 @@
         }
 
         // Cancel editing a message
-        function cancelEdit() {
+        function cancelEditMessage() {
+            if (!selectedMessage) return;
+            
             const editInput = document.getElementById(`edit-input-${selectedMessage.id}`);
             const editActions = document.getElementById(`edit-actions-${selectedMessage.id}`);
             
-            editInput.style.display = 'none';
-            editActions.style.display = 'none';
+            if (editInput && editActions) {
+                editInput.style.display = 'none';
+                editActions.style.display = 'none';
+            }
             
             selectedMessage = null;
+        }
+
+        // Delete a message
+        function deleteMessage() {
+            if (!selectedMessage) return;
+            
+            const conversationId = getConversationId(currentUser.uid, currentContact);
+            const messageRef = database.ref(`conversations/${conversationId}/messages/${selectedMessage.id}`);
+            
+            messageRef.remove()
+                .then(() => {
+                    // Hide modal
+                    document.getElementById('delete-message-modal').classList.add('hidden');
+                    
+                    // Remove from UI
+                    const messageElement = document.getElementById(`message-${selectedMessage.id}`);
+                    if (messageElement) {
+                        messageElement.remove();
+                    }
+                    
+                    // Clear selected message
+                    selectedMessage = null;
+                })
+                .catch(error => {
+                    console.error("Error deleting message:", error);
+                    showError('login-error', `Failed to delete message: ${error.message}`);
+                });
         }
 
         // Search for users by handle
