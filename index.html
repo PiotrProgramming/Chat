@@ -1155,24 +1155,22 @@
 
         // Accept invitation
         function acceptInvitation(uid, handle) {
-            // Add both users to each other's contacts
-            const currentUserContactsRef = database.ref(`contacts/${currentUser.uid}/${uid}`);
-            const otherUserContactsRef = database.ref(`contacts/${uid}/${currentUser.uid}`);
+            // Create update paths
+            const updates = {};
+            updates[`contacts/${currentUser.uid}/${uid}`] = true;
+            updates[`contacts/${uid}/${currentUser.uid}`] = true;
+            updates[`invitations/${currentUser.uid}/${uid}`] = null;
             
-            // Remove invitation
-            const invitationRef = database.ref(`invitations/${currentUser.uid}/${uid}`);
-            
-            // Create a transaction to ensure both operations succeed
-            database.ref().update({
-                [currentUserContactsRef.toString()]: true,
-                [otherUserContactsRef.toString()]: true,
-                [invitationRef.toString()]: null
-            })
+            // Update database
+            database.ref().update(updates)
             .then(() => {
                 showError('login-error', `You're now connected with @${handle}!`);
                 
                 // Refresh invitations list
                 loadInvitations();
+                
+                // Refresh contacts list
+                loadContacts();
             })
             .catch(error => {
                 console.error("Error accepting invitation:", error);
@@ -1182,10 +1180,12 @@
 
         // Decline invitation
         function declineInvitation(uid) {
-            // Remove invitation
-            const invitationRef = database.ref(`invitations/${currentUser.uid}/${uid}`);
+            // Create update paths
+            const updates = {};
+            updates[`invitations/${currentUser.uid}/${uid}`] = null;
             
-            invitationRef.remove()
+            // Update database
+            database.ref().update(updates)
                 .then(() => {
                     // Refresh invitations list
                     loadInvitations();
