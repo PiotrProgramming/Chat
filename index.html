@@ -154,15 +154,17 @@
             color: #0ea5e9; /* Bright blue for delivered (like WhatsApp) */
             font-size: 0.65rem;
             font-weight: bold;
-            -webkit-text-stroke: 1px black;
-            text-stroke: 1px black;
+            -webkit-text-stroke: 1px #10b981; /* Green border */
+            text-stroke: 1px #10b981; /* Green border */
+            margin-left: 4px;
         }
         .read-icon {
             color: #10b981; /* Bright green for read (like WhatsApp) */
             font-size: 0.65rem;
             font-weight: bold;
-            -webkit-text-stroke: 1px black;
-            text-stroke: 1px black;
+            -webkit-text-stroke: 1px #10b981; /* Green border */
+            text-stroke: 1px #10b981; /* Green border */
+            margin-left: 4px;
         }
         .edit-message-input {
             width: 100%;
@@ -944,7 +946,12 @@
                     const timeEl = contactElement.querySelector('.last-message-time');
                     if (timeEl) {
                         const date = new Date(message.timestamp);
-                        timeEl.textContent = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        // Format as "HH:mm MM/DD"
+                        const hours = date.getHours().toString().padStart(2, '0');
+                        const minutes = date.getMinutes().toString().padStart(2, '0');
+                        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                        const day = date.getDate().toString().padStart(2, '0');
+                        timeEl.textContent = `${hours}:${minutes} ${month}/${day}`;
                     }
                 });
                 
@@ -1067,7 +1074,12 @@
             
             // Format timestamp
             const date = new Date(message.timestamp);
-            const timeString = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            // Format as "HH:mm MM/DD"
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const timeString = `${hours}:${minutes} ${month}/${day}`;
             
             // Delivery status
             let deliveryStatus = '<span class="delivered-icon">✓</span>';
